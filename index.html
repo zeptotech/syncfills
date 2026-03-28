@@ -3,643 +3,272 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RxSync</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<title>RxSync — Prescription Synchronization Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0f0f11;
-  --surface: #1a1a1f;
-  --surface2: #222228;
-  --surface3: #2a2a32;
-  --border: #2e2e38;
-  --border2: #3a3a48;
-  --ink: #e8e6f0;
-  --ink-2: #9996b0;
-  --ink-3: #5a5870;
-  --green: #3dd68c;
-  --green-dim: #1a3d2a;
-  --amber: #f0a340;
-  --amber-dim: #3d2a10;
-  --red: #e85d5d;
-  --red-dim: #3d1a1a;
-  --blue: #5b8cf5;
-  --blue-dim: #1a2550;
-  --radius: 6px;
+  --bg: #f4f1eb;
+  --surface: #ffffff;
+  --surface2: #edeae3;
+  --ink: #1a1814;
+  --ink-muted: #6b6660;
+  --accent: #2d5a3d;
+  --accent-light: #e8f0eb;
+  --accent2: #c8440a;
+  --accent2-light: #fdf0eb;
+  --blue: #2a4d7a;
+  --blue-light: #e8eef5;
+  --border: #d4d0c8;
+  --shadow: 0 2px 12px rgba(26,24,20,0.08);
+  --shadow-lg: 0 8px 32px rgba(26,24,20,0.12);
+  --radius: 4px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'DM Mono', monospace;
   background: var(--bg);
   color: var(--ink);
   min-height: 100vh;
 }
 
-/* GRID BACKGROUND */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  background-image:
-    linear-gradient(var(--surface) 1px, transparent 1px),
-    linear-gradient(90deg, var(--surface) 1px, transparent 1px);
-  background-size: 40px 40px;
-  opacity: 0.4;
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* HEADER */
 header {
-  position: relative;
-  z-index: 10;
-  padding: 28px 40px;
-  border-bottom: 1px solid var(--border);
+  background: var(--ink);
+  color: var(--bg);
+  padding: 20px 40px;
   display: flex;
-  align-items: center;
-  gap: 20px;
-  background: rgba(15,15,17,0.95);
-  backdrop-filter: blur(8px);
+  align-items: baseline;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 3px solid var(--accent);
 }
+header h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+header h1 span { color: #7ecb95; }
+header p { font-size: 0.7rem; color: #a09a94; text-transform: uppercase; letter-spacing: 0.1em; }
 
-.logo {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: -0.04em;
-  color: var(--ink);
-}
+main { max-width: 980px; margin: 0 auto; padding: 40px 24px 80px; }
 
-.logo span {
-  color: var(--green);
+.section-label {
+  font-size: 0.65rem; font-weight: 500; text-transform: uppercase;
+  letter-spacing: 0.15em; color: var(--ink-muted); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px;
 }
+.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
-.logo-tag {
-  font-size: 0.65rem;
-  color: var(--ink-3);
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  border: 1px solid var(--border2);
-  padding: 3px 8px;
-  border-radius: 3px;
+/* GRACE CARD */
+.sync-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; margin-bottom: 32px;
+  box-shadow: var(--shadow); display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap;
 }
+.field-group { display: flex; flex-direction: column; gap: 6px; }
+.field-group label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted); }
+.leeway-note { font-size: 0.7rem; color: var(--ink-muted); margin-top: 4px; }
 
-/* MAIN */
-main {
-  position: relative;
-  z-index: 1;
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 48px 24px 100px;
+input[type="date"], input[type="number"], input[type="text"] {
+  font-family: 'DM Mono', monospace; font-size: 0.9rem;
+  padding: 10px 14px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); background: var(--surface);
+  color: var(--ink); outline: none; transition: border-color 0.15s;
 }
-
-/* SECTION LABELS */
-.sl {
-  font-size: 0.6rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-  color: var(--ink-3);
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.sl::before {
-  content: '';
-  width: 24px;
-  height: 1px;
-  background: var(--green);
-  flex-shrink: 0;
-}
-.sl::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--border);
-}
-
-/* PARAMS ROW */
-.params {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 24px;
-  margin-bottom: 36px;
-  display: flex;
-  align-items: flex-end;
-  gap: 24px;
-  flex-wrap: wrap;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field label {
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--ink-3);
-}
-
-.field input {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.85rem;
-  background: var(--surface2);
-  border: 1px solid var(--border2);
-  color: var(--ink);
-  border-radius: var(--radius);
-  padding: 10px 14px;
-  outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.field input:focus {
-  border-color: var(--green);
-  box-shadow: 0 0 0 3px rgba(61,214,140,0.12);
-}
-.field input[type="number"] { width: 100px; }
-
-.field-note {
-  font-size: 0.6rem;
-  color: var(--ink-3);
-}
+input:focus { border-color: var(--accent); }
+input[type="number"] { width: 90px; }
 
 /* RX CARDS */
-.rx-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
+.rx-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
 .rx-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 18px 20px;
-  display: grid;
-  grid-template-columns: 1fr 180px 160px 42px;
-  gap: 16px;
-  align-items: end;
-  transition: border-color 0.2s;
-  animation: cardIn 0.18s ease;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 20px 24px;
+  box-shadow: var(--shadow);
+  display: grid; grid-template-columns: 1fr 180px 160px auto;
+  align-items: end; gap: 20px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  animation: slideIn 0.2s ease;
 }
-
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(-6px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-.rx-card:hover { border-color: var(--border2); }
-
-.rx-num-tag {
-  font-size: 0.55rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--green);
-  margin-bottom: 5px;
-}
-
+@keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+.rx-card:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); }
 .rx-card input[type="text"] { width: 100%; }
+.rx-num { font-family: 'Syne', sans-serif; font-size: 0.65rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
 
-.btn-x {
-  width: 42px;
-  height: 40px;
-  background: none;
-  border: 1px solid var(--border2);
-  border-radius: var(--radius);
-  color: var(--ink-3);
-  cursor: pointer;
-  font-size: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s;
-  align-self: flex-end;
+.btn-remove {
+  background: none; border: 1.5px solid var(--border); border-radius: var(--radius);
+  color: var(--ink-muted); width: 36px; height: 36px; cursor: pointer;
+  font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s; align-self: flex-end;
 }
-.btn-x:hover {
-  background: var(--red-dim);
-  border-color: var(--red);
-  color: var(--red);
-}
+.btn-remove:hover { background: var(--accent2-light); border-color: var(--accent2); color: var(--accent2); }
 
-/* EMPTY */
-.empty {
-  border: 1px dashed var(--border2);
-  border-radius: var(--radius);
-  text-align: center;
-  padding: 40px;
-  color: var(--ink-3);
-  font-size: 0.75rem;
-  margin-bottom: 16px;
-}
-.empty-icon { font-size: 2rem; margin-bottom: 10px; display: block; }
-
-/* ACTIONS */
-.actions {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 48px;
-  flex-wrap: wrap;
-}
-
+/* BUTTONS */
+.actions { display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
 .btn {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.75rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
-  padding: 11px 22px;
-  border-radius: var(--radius);
-  border: 1px solid transparent;
-  cursor: pointer;
-  text-transform: uppercase;
-  transition: all 0.15s;
+  font-family: 'DM Mono', monospace; font-size: 0.8rem; font-weight: 500;
+  padding: 12px 24px; border-radius: var(--radius); border: none;
+  cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em; transition: all 0.15s;
 }
+.btn-add { background: var(--surface); border: 1.5px solid var(--border); color: var(--ink); }
+.btn-add:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+.btn-calculate { background: var(--accent); color: #fff; border: 1.5px solid var(--accent); letter-spacing: 0.1em; }
+.btn-calculate:hover { background: #1e3f2b; border-color: #1e3f2b; }
+.btn-clear { background: none; border: 1.5px solid var(--border); color: var(--ink-muted); }
+.btn-clear:hover { background: var(--accent2-light); border-color: var(--accent2); color: var(--accent2); }
 
-.btn-add {
-  background: var(--surface2);
-  border-color: var(--border2);
-  color: var(--ink-2);
+/* EMPTY / ERROR */
+.empty-state {
+  text-align: center; padding: 48px; color: var(--ink-muted); font-size: 0.8rem;
+  border: 1.5px dashed var(--border); border-radius: var(--radius); margin-bottom: 20px;
 }
-.btn-add:hover {
-  background: var(--surface3);
-  border-color: var(--green);
-  color: var(--green);
-}
-
-.btn-calc {
-  background: var(--green);
-  color: #0a1f14;
-  font-weight: 600;
-  border-color: var(--green);
-}
-.btn-calc:hover {
-  background: #4de89e;
-}
-
-.btn-reset {
-  background: none;
-  border-color: var(--border2);
-  color: var(--ink-3);
-}
-.btn-reset:hover {
-  border-color: var(--red);
-  color: var(--red);
-  background: var(--red-dim);
-}
-
-/* ERROR */
-.error {
-  background: var(--red-dim);
-  border: 1px solid var(--red);
-  border-radius: var(--radius);
-  color: var(--red);
-  padding: 10px 16px;
-  font-size: 0.75rem;
-  margin-bottom: 16px;
-  display: none;
+.empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+.error-msg {
+  background: var(--accent2-light); border: 1.5px solid var(--accent2); color: var(--accent2);
+  border-radius: var(--radius); padding: 12px 18px; font-size: 0.8rem; margin-bottom: 16px; display: none;
 }
 
 /* RESULTS */
-#results {
-  display: none;
-  animation: fadeUp 0.3s ease;
-}
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+#results { display: none; animation: fadeUp 0.3s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-/* SYNC OPPORTUNITY BLOCK */
-.sync-opp {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin-bottom: 24px;
-  position: relative;
+/* SUMMARY BAR */
+.summary-bar {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 20px;
+  overflow: hidden; box-shadow: var(--shadow);
 }
+.summary-item { padding: 18px 24px; border-right: 1px solid var(--border); text-align: center; }
+.summary-item:last-child { border-right: none; }
+.summary-value { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 4px; }
+.summary-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-muted); }
 
-.sync-opp + .sync-opp {
-  margin-top: 32px;
+/* SYNC BANNER */
+.sync-banner {
+  background: var(--ink); color: #fff; padding: 20px 28px; border-radius: var(--radius);
+  margin-bottom: 20px; box-shadow: var(--shadow-lg);
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
 }
+.sync-banner h2 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+.sync-banner-date { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: #7ecb95; }
+.sync-banner-sub { font-size: 0.7rem; color: #a09a94; margin-top: 2px; }
 
-.opp-header {
-  background: var(--surface2);
+/* FILL EVENTS TABLE */
+.section-block {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 24px;
+}
+.section-block-header {
+  background: var(--surface2); padding: 14px 24px;
   border-bottom: 1px solid var(--border);
-  padding: 16px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 12px;
+  display: flex; align-items: center; justify-content: space-between;
 }
+.section-block-header h3 { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; }
+.event-date-label { font-size: 0.7rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.1em; }
 
-.opp-num {
-  font-size: 0.6rem;
-  color: var(--ink-3);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
+table { width: 100%; border-collapse: collapse; }
+th {
+  font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--ink-muted); padding: 10px 20px; text-align: left;
+  background: var(--surface2); border-bottom: 1px solid var(--border);
 }
+td { padding: 14px 20px; font-size: 0.83rem; border-bottom: 1px solid var(--surface2); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--accent-light); }
 
-.opp-date {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--ink);
-  letter-spacing: -0.02em;
+.pill-badge {
+  display: inline-block; font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700;
+  padding: 4px 14px; border-radius: 99px; min-width: 60px; text-align: center; color: #fff;
 }
+.pill-green  { background: var(--accent); }
+.pill-amber  { background: #b07a1a; }
+.pill-blue   { background: var(--blue); }
 
-.opp-window {
-  font-size: 0.7rem;
-  color: var(--ink-3);
-  margin-top: 2px;
+.type-badge {
+  font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 3px 10px; border-radius: 99px; font-weight: 500; white-space: nowrap;
 }
+.type-short   { background: var(--accent2-light); color: var(--accent2); }
+.type-sync    { background: var(--accent-light);  color: var(--accent); }
+.type-normal  { background: var(--blue-light);    color: var(--blue); }
 
-.opp-badge {
-  font-size: 0.65rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 4px 12px;
-  border-radius: 99px;
+/* TIMELINE */
+.timeline-wrap { padding: 24px; }
+.tl-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--ink-muted); margin-bottom: 16px; }
+.tl-row { display: flex; align-items: center; margin-bottom: 10px; gap: 12px; }
+.tl-label { font-size: 0.72rem; width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-muted); }
+.tl-track { flex: 1; height: 28px; background: var(--surface2); border-radius: 3px; position: relative; overflow: visible; }
+.tl-seg {
+  position: absolute; top: 0; height: 100%; border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem; font-weight: 500; color: rgba(255,255,255,0.85);
+  overflow: hidden; min-width: 2px;
 }
+.seg-past   { background: var(--surface3,#ddd); border: 1px solid var(--border); color: var(--ink-muted); }
+.seg-short  { background: #b07a1a; }
+.seg-sync   { background: var(--accent); }
+.tl-vline { position: absolute; top: -4px; bottom: -4px; width: 2px; z-index: 10; }
+.tl-vline.today { background: var(--accent2); }
+.tl-vline.sync  { background: var(--accent); }
+.tl-axis { position: relative; height: 20px; margin-left: calc(130px + 12px); margin-bottom: 8px; }
+.tl-tick { position: absolute; font-size: 0.6rem; transform: translateX(-50%); white-space: nowrap; }
+.tl-tick.today { color: var(--accent2); }
+.tl-tick.sync  { color: var(--accent); font-weight: 500; }
+.tl-legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+.tl-leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: var(--ink-muted); }
+.tl-leg-swatch { width: 14px; height: 14px; border-radius: 2px; }
 
-.opp-badge.best {
-  background: var(--green-dim);
-  color: var(--green);
-  border: 1px solid rgba(61,214,140,0.3);
-}
-
-.opp-badge.next {
-  background: var(--blue-dim);
-  color: var(--blue);
-  border: 1px solid rgba(91,140,245,0.3);
-}
-
-/* TABLE */
-.opp-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.opp-table th {
-  font-size: 0.58rem;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--ink-3);
-  padding: 10px 20px;
-  text-align: left;
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-}
-
-.opp-table td {
-  padding: 14px 20px;
-  font-size: 0.8rem;
-  border-bottom: 1px solid var(--border);
-  vertical-align: middle;
-}
-
-.opp-table tr:last-child td { border-bottom: none; }
-
-.opp-table tr.in-window td { background: rgba(61,214,140,0.03); }
-.opp-table tr.short-fill td { background: rgba(240,163,64,0.03); }
-.opp-table tr.future td { background: transparent; opacity: 0.55; }
-
-.med-name {
-  font-weight: 500;
-  color: var(--ink);
-}
-
-.date-cell { color: var(--ink-2); }
-
-.fill-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-weight: 700;
-  font-size: 0.9rem;
-  padding: 4px 14px;
-  border-radius: 99px;
-}
-
-.fill-pill.standard {
-  background: var(--green-dim);
-  color: var(--green);
-}
-
-.fill-pill.short {
-  background: var(--amber-dim);
-  color: var(--amber);
-}
-
-.fill-pill.skip {
-  background: var(--surface3);
-  color: var(--ink-3);
-}
-
-.fill-sub {
-  font-size: 0.65rem;
-  color: var(--ink-3);
-  margin-top: 3px;
-}
-
-.status-dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  margin-right: 6px;
-}
-.status-dot.green { background: var(--green); }
-.status-dot.amber { background: var(--amber); }
-.status-dot.grey  { background: var(--ink-3); }
-
-/* SUMMARY */
-.summary {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin-bottom: 12px;
-}
-
-.sum-item {
-  background: var(--surface);
-  padding: 18px 20px;
-  text-align: center;
-}
-
-.sum-val {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.8rem;
-  font-weight: 700;
-  color: var(--green);
-  line-height: 1;
-  margin-bottom: 5px;
-}
-
-.sum-val.amber { color: var(--amber); }
-
-.sum-label {
-  font-size: 0.58rem;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--ink-3);
-}
-
-.explain-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--green);
-  border-radius: var(--radius);
-  padding: 16px 20px;
-  margin-bottom: 28px;
-  font-size: 0.75rem;
-  color: var(--ink-2);
-  line-height: 1.7;
-}
-
-.explain-box strong { color: var(--green); }
-
-/* TIMELINE VISUAL */
-.timeline-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 20px 24px;
-  margin-bottom: 28px;
-  overflow-x: auto;
-}
-
-.timeline-title {
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--ink-3);
-  margin-bottom: 20px;
-}
-
-.tl-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.tl-name {
-  font-size: 0.72rem;
-  color: var(--ink-2);
-  width: 160px;
-  flex-shrink: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.tl-bar-wrap {
-  flex: 1;
-  position: relative;
-  height: 28px;
-}
-
-.tl-bar {
-  position: absolute;
-  top: 4px;
-  height: 20px;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  padding: 0 8px;
-  font-size: 0.6rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-}
-
-.tl-bar.current {
-  background: var(--surface3);
-  color: var(--ink-2);
-  border: 1px solid var(--border2);
-}
-
-.tl-bar.synced {
-  background: var(--green-dim);
-  color: var(--green);
-  border: 1px solid rgba(61,214,140,0.25);
-}
-
-.tl-sync-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--green);
-  opacity: 0.7;
-}
-
-.tl-today-line {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 1px;
-  background: var(--ink-3);
-  opacity: 0.5;
-}
-
-@media (max-width: 640px) {
-  header { padding: 18px 20px; }
+@media (max-width: 700px) {
+  header { padding: 16px 20px; }
   .rx-card { grid-template-columns: 1fr 1fr; }
-  .rx-card > *:first-child { grid-column: 1/-1; }
-  .summary { grid-template-columns: 1fr 1fr; }
-  main { padding: 32px 16px 80px; }
+  .rx-card > *:nth-child(1) { grid-column: 1 / -1; }
+  .summary-bar { grid-template-columns: 1fr; }
+  .summary-item { border-right: none; border-bottom: 1px solid var(--border); }
+  .tl-label { width: 80px; font-size: 0.6rem; }
 }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">Rx<span>Sync</span></div>
-  <div class="logo-tag">Sync Planner</div>
+  <h1>Rx<span>Sync</span></h1>
+  <p>Prescription Synchronization Tool</p>
 </header>
 
 <main>
 
-  <div class="sl">Parameters</div>
-  <div class="params">
-    <div class="field">
+  <div class="section-label">Settings</div>
+  <div class="sync-card">
+    <div class="field-group">
       <label>Grace Period (days)</label>
-      <input type="number" id="grace" value="10" min="1" max="30">
-      <div class="field-note">Early fill window before due date</div>
+      <input type="number" id="gracePeriod" value="10" min="1" max="30">
+      <div class="leeway-note">How early a fill can be dispensed</div>
     </div>
-    <div class="field">
-      <label>Today's Date</label>
-      <input type="date" id="today">
+    <div class="field-group">
+      <label>Standard Days Supply</label>
+      <input type="number" id="stdSupply" value="90" min="1" max="365">
+      <div class="leeway-note">Normal fill amount once synced</div>
     </div>
   </div>
 
-  <div class="sl">Prescriptions</div>
+  <div class="section-label">Prescriptions</div>
   <div class="rx-list" id="rxList"></div>
-  <div class="empty" id="emptyState">
-    <span class="empty-icon">💊</span>
-    Add your prescriptions below to get started.
+  <div class="empty-state" id="emptyState">
+    <span class="icon">💊</span>
+    No prescriptions added yet. Click <strong>+ Add Prescription</strong> to begin.
   </div>
 
-  <div class="error" id="errMsg"></div>
+  <div class="error-msg" id="errorMsg"></div>
 
   <div class="actions">
     <button class="btn btn-add" onclick="addRx()">+ Add Prescription</button>
-    <button class="btn btn-calc" onclick="calculate()">▶ Calculate Sync Plan</button>
-    <button class="btn btn-reset" onclick="clearAll()">✕ Clear</button>
+    <button class="btn btn-calculate" onclick="calculate()">▶ Calculate Sync</button>
+    <button class="btn btn-clear" onclick="clearAll()">✕ Clear All</button>
   </div>
 
   <div id="results"></div>
@@ -647,455 +276,360 @@ main {
 </main>
 
 <script>
-let counter = 0;
-const items = [];
+// ── Helpers ─────────────────────────────────────────────────────────────────
+let rxCounter = 0;
+const rxItems = [];
+const today = new Date(); today.setHours(0,0,0,0);
 
-// Set today's date
-const todayDate = new Date();
-todayDate.setHours(0,0,0,0);
-document.getElementById('today').value = toISO(todayDate);
-
-function toISO(d) {
-  return d.toISOString().split('T')[0];
-}
-
-function parseDate(str) {
+function pd(str) {
   if (!str) return null;
   const [y,m,d] = str.split('-').map(Number);
   return new Date(y, m-1, d);
 }
-
-function addDays(d, n) {
-  const r = new Date(d);
-  r.setDate(r.getDate() + n);
-  return r;
+function fd(date) {
+  return date.toLocaleDateString('en-CA', { year:'numeric', month:'short', day:'numeric' });
 }
-
+function addDays(d, n) {
+  const r = new Date(d); r.setDate(r.getDate() + n); return r;
+}
 function diffDays(a, b) {
   return Math.round((b - a) / 86400000);
 }
-
-function fmt(d) {
-  return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric', year: 'numeric' });
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4500);
 }
 
-function fmtShort(d) {
-  return d.toLocaleDateString('en-CA', { month: 'short', day: 'numeric' });
+// ── UI ───────────────────────────────────────────────────────────────────────
+function updateEmptyState() {
+  document.getElementById('emptyState').style.display = rxItems.length === 0 ? 'block' : 'none';
 }
 
 function addRx() {
-  counter++;
-  const id = counter;
-  items.push(id);
-  refreshEmpty();
+  rxCounter++;
+  const id = rxCounter;
+  rxItems.push(id);
+  updateEmptyState();
 
   const list = document.getElementById('rxList');
   const card = document.createElement('div');
   card.className = 'rx-card';
   card.id = `rx-${id}`;
-
-  // Default last fill to today
-  const defaultDate = document.getElementById('today').value;
-
   card.innerHTML = `
-    <div class="field" style="flex:1">
-      <div class="rx-num-tag">Rx #${id}</div>
-      <label>Medication Name</label>
-      <input type="text" id="name-${id}" placeholder="e.g. Metformin 500mg">
+    <div class="field-group">
+      <div class="rx-num">Rx #${id}</div>
+      <label>Drug / Prescription Name</label>
+      <input type="text" placeholder="e.g. Metformin 500mg" id="name-${id}">
     </div>
-    <div class="field">
+    <div class="field-group">
       <label>Last Fill Date</label>
-      <input type="date" id="date-${id}" value="${defaultDate}">
+      <input type="date" id="date-${id}">
     </div>
-    <div class="field">
-      <label>Days Supply</label>
-      <input type="number" id="supply-${id}" min="1" max="365" placeholder="90" style="width:100%">
+    <div class="field-group">
+      <label>Days Supply Dispensed</label>
+      <input type="number" id="supply-${id}" min="1" max="365" placeholder="90">
     </div>
-    <button class="btn-x" onclick="removeRx(${id})" title="Remove">×</button>
+    <button class="btn-remove" onclick="removeRx(${id})" title="Remove">×</button>
   `;
   list.appendChild(card);
 }
 
 function removeRx(id) {
-  const idx = items.indexOf(id);
-  if (idx > -1) items.splice(idx, 1);
+  const idx = rxItems.indexOf(id);
+  if (idx > -1) rxItems.splice(idx, 1);
   const card = document.getElementById(`rx-${id}`);
   if (card) {
-    card.style.transition = 'all 0.18s';
-    card.style.opacity = '0';
-    card.style.transform = 'translateX(10px)';
-    setTimeout(() => card.remove(), 180);
+    card.style.opacity = '0'; card.style.transform = 'translateX(12px)';
+    card.style.transition = 'all 0.2s ease';
+    setTimeout(() => card.remove(), 200);
   }
-  setTimeout(refreshEmpty, 200);
+  setTimeout(updateEmptyState, 210);
   document.getElementById('results').style.display = 'none';
-}
-
-function refreshEmpty() {
-  document.getElementById('emptyState').style.display = items.length === 0 ? 'block' : 'none';
 }
 
 function clearAll() {
-  items.length = 0;
-  counter = 0;
+  rxItems.length = 0; rxCounter = 0;
   document.getElementById('rxList').innerHTML = '';
   document.getElementById('results').innerHTML = '';
   document.getElementById('results').style.display = 'none';
-  document.getElementById('errMsg').style.display = 'none';
-  refreshEmpty();
+  document.getElementById('errorMsg').style.display = 'none';
+  updateEmptyState();
 }
 
-function showErr(msg) {
-  const el = document.getElementById('errMsg');
-  el.textContent = msg;
-  el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 5000);
-}
-
+// ── CORE ALGORITHM ───────────────────────────────────────────────────────────
+//
+//  The sync target = the LATEST expiry date among all prescriptions.
+//  (The med that runs out last anchors everything else.)
+//
+//  For every other med:
+//    1. Find when it will next be fillable (expiry - grace).
+//    2. From that fill date, issue a SHORT fill of exactly:
+//       (syncTarget - fillDate) days  →  so it expires on sync target.
+//    3. After sync target, everyone fills the standard supply together.
+//
+//  Edge cases:
+//    • Med is already within grace of sync target → normal fill.
+//    • Short fill would be > std supply → just fill std (med already past sync,
+//      or gap is bigger than one fill; we only show one interim fill here).
+//    • Short fill < 1 day → clamp to 1.
+//
 function calculate() {
-  document.getElementById('errMsg').style.display = 'none';
+  document.getElementById('errorMsg').style.display = 'none';
 
-  const todayStr = document.getElementById('today').value;
-  const grace = parseInt(document.getElementById('grace').value) || 10;
+  const grace = parseInt(document.getElementById('gracePeriod').value) || 10;
+  const stdDays = parseInt(document.getElementById('stdSupply').value) || 90;
 
-  if (items.length === 0) { showErr('Please add at least one prescription.'); return; }
+  if (rxItems.length === 0) { showError('Please add at least one prescription.'); return; }
 
-  const today = parseDate(todayStr);
+  // 1. Parse meds
   const meds = [];
-
-  for (const id of items) {
-    const name = document.getElementById(`name-${id}`).value.trim() || `Rx #${id}`;
+  for (const id of rxItems) {
+    const name    = document.getElementById(`name-${id}`).value.trim() || `Rx #${id}`;
     const dateStr = document.getElementById(`date-${id}`).value;
-    const supply = parseInt(document.getElementById(`supply-${id}`).value);
+    const supply  = parseInt(document.getElementById(`supply-${id}`).value);
 
-    if (!dateStr) { showErr(`"${name}": please enter a Last Fill Date.`); return; }
-    if (!supply || supply < 1) { showErr(`"${name}": please enter a valid Days Supply.`); return; }
+    if (!dateStr) { showError(`"${name}": please enter a Last Fill Date.`); return; }
+    if (!supply || supply < 1) { showError(`"${name}": please enter a valid Days Supply.`); return; }
 
-    const lastFill = parseDate(dateStr);
-    const runsOut = addDays(lastFill, supply);
-    const earliestFill = addDays(runsOut, -grace); // can fill up to 'grace' days early
-
-    meds.push({ id, name, lastFill, supply, runsOut, earliestFill });
+    const lastFill = pd(dateStr);
+    const expiry   = addDays(lastFill, supply);
+    meds.push({ id, name, lastFill, supply, expiry });
   }
 
-  // Sort by earliest fill date
-  meds.sort((a,b) => a.earliestFill - b.earliestFill);
+  // 2. Sync target = latest expiry
+  const syncTarget = meds.reduce((best, m) => m.expiry > best ? m.expiry : best, meds[0].expiry);
 
-  // ── ALGORITHM ──
-  // 1. Find all natural "fill opportunities" starting from today:
-  //    Each med defines an earliest fill date. Group meds that share a window.
-  // 2. For each opportunity date (earliest fill of a med that's >= today),
-  //    see which other meds can ALSO be filled then (their window overlaps).
-  // 3. For meds that can't be filled at this opportunity, suggest a short fill
-  //    so their NEXT refill aligns with the group's next date.
-  // 4. Score opportunities by how many meds are in-window.
-  // 5. Show the best opportunity (most meds) + next couple.
+  // 3. For each med, figure out the fill plan
+  const plans = meds.map(med => {
+    const daysToExpiry = diffDays(today, med.expiry);
 
-  // Candidate opportunity dates: each med's earliest fill date, filtered to >= today
-  const candidateDates = meds
-    .map(m => m.earliestFill < today ? today : m.earliestFill)
-    .filter((d, i, arr) => arr.findIndex(x => x.getTime() === d.getTime()) === i);
+    // When can this med next be filled?
+    // Earliest fill date = expiry - grace  (but not before today)
+    const earliestFill = addDays(med.expiry, -grace);
+    const fillDate = earliestFill < today ? today : earliestFill;
 
-  // Also include today if meds are overdue
-  if (!candidateDates.find(d => d.getTime() === today.getTime())) {
-    // check if any med is overdue
-    if (meds.some(m => m.runsOut <= today)) {
-      candidateDates.unshift(new Date(today));
-    }
-  }
-  candidateDates.sort((a,b) => a-b);
+    // How many days from the fill date to sync target?
+    const daysToSync = diffDays(fillDate, syncTarget);
 
-  // For each candidate date, evaluate which meds are in-window
-  const opportunities = candidateDates.map(fillDate => {
-    const inWindow = [];
-    const needShortFill = [];
-    const future = [];
+    // Is this med already the anchor (its expiry IS the sync target)?
+    const isAnchor = med.expiry.getTime() === syncTarget.getTime();
 
-    for (const med of meds) {
-      // A med can be filled on fillDate if fillDate >= med.earliestFill AND fillDate <= med.runsOut + grace
-      // (we allow slightly past due too — pharmacy still fills it)
-      const canFill = fillDate >= med.earliestFill || diffDays(med.runsOut, fillDate) <= grace;
-      const isFuture = fillDate < med.earliestFill && diffDays(fillDate, med.earliestFill) > 0;
+    // Is the med already within grace of sync target?
+    const offsetFromSync = diffDays(med.expiry, syncTarget); // positive = expires before sync
+    const alreadySynced = Math.abs(offsetFromSync) <= grace;
 
-      if (canFill && !isFuture) {
-        inWindow.push(med);
-      } else {
-        // This med can't be filled yet at fillDate.
-        // Calculate a short fill so it expires near fillDate + supply (next round)
-        // Short fill days = days from lastFill to fillDate = makes it run out on fillDate
-        // But also, we want the NEXT fill after the short fill to land on a future unified date.
-        needShortFill.push(med);
-      }
+    let fillType, shortDays, fillDateUsed;
+
+    if (isAnchor || alreadySynced) {
+      // No short fill needed — just fill normal at next due date
+      fillType = isAnchor ? 'anchor' : 'synced';
+      shortDays = stdDays;
+      fillDateUsed = fillDate;
+    } else if (daysToSync <= 0) {
+      // Sync date has already passed (or fill date is after sync) — fill normal
+      fillType = 'normal';
+      shortDays = stdDays;
+      fillDateUsed = fillDate;
+    } else {
+      // Needs a short fill: fill exactly enough to expire on sync target
+      shortDays = Math.max(1, daysToSync);
+      fillType = 'short';
+      fillDateUsed = fillDate;
     }
 
-    return { fillDate, inWindow, needShortFill };
+    const newExpiry = addDays(fillDateUsed, shortDays);
+
+    return { ...med, fillDate: fillDateUsed, fillDays: shortDays, fillType, newExpiry, offsetFromSync, daysToExpiry, syncTarget };
   });
 
-  // Find best opportunity: most in-window meds
-  opportunities.sort((a,b) => b.inWindow.length - a.inWindow.length || a.fillDate - b.fillDate);
+  renderResults(plans, grace, stdDays, syncTarget);
+}
 
-  // Re-sort to show chronologically but highlight best
-  const sorted = [...candidateDates].map(d => opportunities.find(o => o.fillDate.getTime() === d.getTime()));
-
-  // Build unified sync point: the date when ALL meds can eventually align
-  // After the best opportunity, project when all short-fill meds will land
-  const best = opportunities[0]; // most meds
-
-  // For each needShortFill in best opp, compute projected sync date (after short fill)
-  // short fill: days from lastFill → fillDate (med runs out ON fillDate)
-  // but min 1 day, and we want the NEXT fill to be at the unified date
-  // The "unified date" after short fill = fillDate + stdSupply
-  // Actually we want: after the short fill, the med's next run-out is close to the inWindow meds' next run-out.
-  // inWindow meds next run out = fillDate + supply (their standard supply)
-  // So short fill target = (fillDate + supply) - lastFill in days
-
-  // Let's compute the recommended next sync date = fillDate + median supply of inWindow meds
-  let nextSyncSupply = 90;
-  if (best.inWindow.length > 0) {
-    const supplies = best.inWindow.map(m => m.supply);
-    supplies.sort((a,b)=>a-b);
-    nextSyncSupply = supplies[Math.floor(supplies.length/2)];
-  }
-  const nextSyncDate = addDays(best.fillDate, nextSyncSupply);
-
-  // Render
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function renderResults(plans, grace, stdDays, syncTarget) {
   const out = document.getElementById('results');
   out.innerHTML = '';
   out.style.display = 'block';
 
-  // ── EXPLAIN BOX ──
-  const totalInWindow = best.inWindow.length;
-  const totalShort = best.needShortFill.length;
+  // Summary counts
+  const nShort   = plans.filter(p => p.fillType === 'short').length;
+  const nSynced  = plans.filter(p => p.fillType === 'anchor' || p.fillType === 'synced').length;
 
-  const explainDiv = document.createElement('div');
-  explainDiv.className = 'explain-box';
-  explainDiv.innerHTML = `
-    <strong>How this works:</strong> Your fill window opens <strong>${grace} days before</strong> a prescription runs out.
-    The planner finds the soonest date where the most medications overlap in their fill windows.
-    Medications that don't line up yet get a <strong>short fill</strong> — a reduced days supply so their
-    <em>next</em> refill falls in sync with the rest.
-  `;
-  out.appendChild(explainDiv);
-
-  // ── SUMMARY ──
-  const sumDiv = document.createElement('div');
-  sumDiv.className = 'summary';
-  sumDiv.innerHTML = `
-    <div class="sum-item">
-      <div class="sum-val">${meds.length}</div>
-      <div class="sum-label">Total Rx</div>
+  // ── Summary bar
+  const sumBar = document.createElement('div');
+  sumBar.className = 'summary-bar';
+  sumBar.innerHTML = `
+    <div class="summary-item">
+      <div class="summary-value">${plans.length}</div>
+      <div class="summary-label">Prescriptions</div>
     </div>
-    <div class="sum-item">
-      <div class="sum-val">${totalInWindow}</div>
-      <div class="sum-label">Fill Together</div>
+    <div class="summary-item">
+      <div class="summary-value">${nShort}</div>
+      <div class="summary-label">Short Fills Needed</div>
     </div>
-    <div class="sum-item">
-      <div class="sum-val amber">${totalShort}</div>
-      <div class="sum-label">Short Fill Needed</div>
-    </div>
-    <div class="sum-item">
-      <div class="sum-val">${fmt(best.fillDate)}</div>
-      <div class="sum-label">Sync Date</div>
+    <div class="summary-item">
+      <div class="summary-value">${nSynced}</div>
+      <div class="summary-label">Already at Anchor</div>
     </div>
   `;
-  out.appendChild(sumDiv);
+  out.appendChild(sumBar);
 
-  const slDiv = document.createElement('div');
-  slDiv.className = 'sl';
-  slDiv.style.marginTop = '32px';
-  slDiv.textContent = 'Sync Plan';
-  out.appendChild(slDiv);
+  // ── Sync banner
+  const banner = document.createElement('div');
+  banner.className = 'sync-banner';
+  banner.innerHTML = `
+    <div>
+      <h2>Sync Target Date</h2>
+      <div class="sync-banner-sub">All prescriptions will align for 90-day fills from this date</div>
+    </div>
+    <div style="text-align:right">
+      <div class="sync-banner-date">${fd(syncTarget)}</div>
+      <div class="sync-banner-sub">${grace}-day grace window applies</div>
+    </div>
+  `;
+  out.appendChild(banner);
 
-  // ── MAIN OPPORTUNITY TABLE ──
-  renderOpportunity(out, best, 0, true, nextSyncDate, today, grace, nextSyncSupply);
+  // ── Main table
+  const block = document.createElement('div');
+  block.className = 'section-block';
 
-  // ── TIMELINE ──
-  renderTimeline(out, meds, best.fillDate, nextSyncDate, today);
+  const blockHead = document.createElement('div');
+  blockHead.className = 'section-block-header';
+  blockHead.innerHTML = `<h3>Fill Plan — Interim Fills to Sync</h3><span class="event-date-label">One fill per Rx until sync date</span>`;
+  block.appendChild(blockHead);
+
+  const table = document.createElement('table');
+  table.innerHTML = `
+    <thead><tr>
+      <th>#</th>
+      <th>Prescription</th>
+      <th>Current Expiry</th>
+      <th>Next Fill Window Opens</th>
+      <th>Recommended Fill</th>
+      <th>New Expiry After Fill</th>
+      <th>Type</th>
+    </tr></thead>
+  `;
+
+  const tbody = document.createElement('tbody');
+  plans.forEach((p, i) => {
+    const fillWindowStr = fd(addDays(p.expiry, -grace)) + ' – ' + fd(p.expiry);
+    const diff = p.fillDays - stdDays;
+    const diffLabel = diff === 0 ? 'Standard fill' : (diff > 0 ? `+${diff}d vs std` : `${diff}d vs std (short)`);
+
+    let badgeClass, typeClass, typeLabel;
+    if (p.fillType === 'short') {
+      badgeClass = 'pill-amber'; typeClass = 'type-short'; typeLabel = 'Short Fill';
+    } else if (p.fillType === 'anchor') {
+      badgeClass = 'pill-green'; typeClass = 'type-sync'; typeLabel = 'Anchor';
+    } else if (p.fillType === 'synced') {
+      badgeClass = 'pill-green'; typeClass = 'type-sync'; typeLabel = 'Already Synced';
+    } else {
+      badgeClass = 'pill-blue'; typeClass = 'type-normal'; typeLabel = 'Normal Fill';
+    }
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color:var(--ink-muted);font-size:0.75rem">${i+1}</td>
+      <td style="font-weight:500">${p.name}</td>
+      <td>${fd(p.expiry)}</td>
+      <td style="font-size:0.78rem">${fillWindowStr}</td>
+      <td>
+        <span class="pill-badge ${badgeClass}">${p.fillDays}d</span>
+        <div style="font-size:0.7rem;color:var(--ink-muted);margin-top:3px">${diffLabel}</div>
+      </td>
+      <td style="font-weight:500">${fd(p.newExpiry)}</td>
+      <td><span class="type-badge ${typeClass}">${typeLabel}</span></td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  table.appendChild(tbody);
+  block.appendChild(table);
+  out.appendChild(block);
+
+  // ── After-sync note
+  const note = document.createElement('div');
+  note.style.cssText = 'background:var(--accent-light);border:1.5px solid var(--accent);border-radius:var(--radius);padding:16px 20px;font-size:0.82rem;color:var(--accent);margin-bottom:24px;';
+  note.innerHTML = `<strong>After ${fd(syncTarget)}:</strong> Fill all ${plans.length} prescriptions for <strong>${stdDays} days</strong> together on the same pickup — every cycle from this point forward.`;
+  out.appendChild(note);
+
+  // ── Timeline
+  renderTimeline(out, plans, grace, syncTarget);
 
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-function renderOpportunity(container, opp, idx, isBest, nextSyncDate, today, grace, nextSyncSupply) {
-  const wrap = document.createElement('div');
-  wrap.className = 'sync-opp';
+function renderTimeline(out, plans, grace, syncTarget) {
+  const block = document.createElement('div');
+  block.className = 'section-block';
 
-  const daysFromToday = diffDays(today, opp.fillDate);
-  const daysLabel = daysFromToday === 0 ? 'Today' : daysFromToday === 1 ? 'Tomorrow' : `In ${daysFromToday} days`;
-
-  wrap.innerHTML = `
-    <div class="opp-header">
-      <div>
-        <div class="opp-num">Sync Fill Date</div>
-        <div class="opp-date">${fmt(opp.fillDate)}</div>
-        <div class="opp-window">${daysLabel} · Fill window: ${fmtShort(opp.fillDate)} — ${fmtShort(addDays(opp.fillDate, grace))}</div>
-      </div>
-      <span class="opp-badge best">★ Optimal Sync Point</span>
-    </div>
-    <table class="opp-table">
-      <thead>
-        <tr>
-          <th>Medication</th>
-          <th>Last Filled</th>
-          <th>Runs Out</th>
-          <th>Action</th>
-          <th>Recommended Days Supply</th>
-          <th>Next Runs Out</th>
-        </tr>
-      </thead>
-      <tbody id="opp-body-${idx}"></tbody>
-    </table>
-  `;
-
-  container.appendChild(wrap);
-  const tbody = document.getElementById(`opp-body-${idx}`);
-
-  // Render in-window meds first, then short-fill meds
-  const allRows = [
-    ...opp.inWindow.map(m => ({ med: m, type: 'window' })),
-    ...opp.needShortFill.map(m => ({ med: m, type: 'short' }))
-  ];
-
-  // Sort back to original order
-  allRows.sort((a,b) => {
-    const ai = opp.inWindow.indexOf(a.med) >= 0 ? 0 : 1;
-    const bi = opp.inWindow.indexOf(b.med) >= 0 ? 0 : 1;
-    return ai - bi || a.med.runsOut - b.med.runsOut;
-  });
-
-  for (const { med, type } of allRows) {
-    const tr = document.createElement('tr');
-
-    if (type === 'window') {
-      // In-window: fill full supply
-      const nextRunsOut = addDays(opp.fillDate, med.supply);
-      tr.className = 'in-window';
-      tr.innerHTML = `
-        <td><div class="med-name">${med.name}</div></td>
-        <td class="date-cell">${fmtShort(med.lastFill)}</td>
-        <td class="date-cell">${fmtShort(med.runsOut)}</td>
-        <td><span class="status-dot green"></span> Fill now</td>
-        <td>
-          <span class="fill-pill standard">${med.supply}d</span>
-          <div class="fill-sub">Full supply — in sync</div>
-        </td>
-        <td class="date-cell">${fmtShort(nextRunsOut)}</td>
-      `;
-    } else {
-      // Short fill: fill just enough so next refill lands near nextSyncDate
-      // Short fill days = nextSyncDate - opp.fillDate = would make it expire on nextSyncDate  ... no
-      // Short fill = days needed so the med expires near opp.fillDate + nextSyncSupply
-      // i.e. fill enough days from lastFill to reach opp.fillDate, then next fill is full supply
-      // Actually: short fill days = diffDays(lastFill → opp.fillDate)
-      // But med might not be due yet, so we can't fill it on opp.fillDate.
-      // Instead, we fill it on its earliest fill date with a short supply.
-      // Short fill = days so it expires on opp.fillDate + standard supply (nextSyncDate)
-      // shortFillDays = diffDays(med.lastFill, nextSyncDate) - med.supply (no, that's wrong)
-      // 
-      // The med's earliest fill is AFTER opp.fillDate. We can't fill it early.
-      // Instead: fill on its next earliest window with a SHORT supply so that next refill aligns.
-      // nextSyncDate is opp.fillDate + nextSyncSupply
-      // To run out on nextSyncDate: fill on earliestFill with supply = diffDays(earliestFill, nextSyncDate)
-      // But if earliestFill < today → fill today
-
-      const fillOn = med.earliestFill < today ? today : med.earliestFill;
-      const shortDays = Math.max(1, diffDays(fillOn, nextSyncDate));
-      const nextRunsOut = addDays(fillOn, shortDays);
-      const saved = med.supply - shortDays;
-
-      tr.className = 'short-fill';
-      tr.innerHTML = `
-        <td><div class="med-name">${med.name}</div></td>
-        <td class="date-cell">${fmtShort(med.lastFill)}</td>
-        <td class="date-cell">${fmtShort(med.runsOut)}</td>
-        <td><span class="status-dot amber"></span> Fill on ${fmtShort(fillOn)}</td>
-        <td>
-          <span class="fill-pill short">${shortDays}d</span>
-          <div class="fill-sub">Short fill (saves ${saved < 0 ? 0 : saved}d) · aligns to sync</div>
-        </td>
-        <td class="date-cell">${fmtShort(nextRunsOut)} ≈ sync</td>
-      `;
-    }
-
-    tbody.appendChild(tr);
-  }
-}
-
-function renderTimeline(container, meds, syncDate, nextSyncDate, today) {
-  const slDiv = document.createElement('div');
-  slDiv.className = 'sl';
-  slDiv.style.marginTop = '32px';
-  slDiv.textContent = 'Timeline View';
-  container.appendChild(slDiv);
+  const blockHead = document.createElement('div');
+  blockHead.className = 'section-block-header';
+  blockHead.innerHTML = `<h3>Visual Timeline</h3><span class="event-date-label">Green bar = sync date</span>`;
+  block.appendChild(blockHead);
 
   const wrap = document.createElement('div');
   wrap.className = 'timeline-wrap';
 
-  // Time range: today to nextSyncDate + 30 days
-  const rangeStart = new Date(today);
-  const rangeEnd = addDays(nextSyncDate, 30);
-  const totalDays = diffDays(rangeStart, rangeEnd);
+  // Date range: min of (all last fills, today) → sync target + 10
+  const allDates = plans.flatMap(p => [p.lastFill, p.expiry, p.fillDate, p.newExpiry]);
+  const minD = allDates.reduce((a,b) => a < b ? a : b);
+  const maxD = addDays(syncTarget, 15);
+  const totalSpan = diffDays(minD, maxD);
 
-  function pct(d) {
-    const days = diffDays(rangeStart, d);
-    return Math.max(0, Math.min(100, (days / totalDays) * 100));
-  }
+  function pct(d) { return Math.max(0, Math.min(100, diffDays(minD, d) / totalSpan * 100)); }
 
-  let html = `<div class="timeline-title">From today through sync convergence</div>`;
+  let html = `<div class="tl-title">Timeline · ${plans.length} prescriptions</div>`;
 
-  for (const med of meds) {
-    const startPct = pct(med.lastFill);
-    const endPct = pct(med.runsOut);
-    const width = Math.max(1, endPct - startPct);
-    const syncStartPct = pct(syncDate);
-    const syncEndPct = pct(nextSyncDate);
-    const syncWidth = Math.max(1, syncEndPct - syncStartPct);
+  plans.forEach(p => {
+    // Segment 1: existing fill (lastFill → expiry)  [shown as past/current]
+    // Segment 2: short/bridge fill (fillDate → newExpiry) [amber if short, green if anchor]
+    const s1L = pct(p.lastFill).toFixed(2);
+    const s1W = Math.max(0.5, (pct(p.expiry) - pct(p.lastFill))).toFixed(2);
+    const s2L = pct(p.fillDate).toFixed(2);
+    const s2W = Math.max(0.5, (pct(p.newExpiry) - pct(p.fillDate))).toFixed(2);
 
-    html += `
-      <div class="tl-row">
-        <div class="tl-name" title="${med.name}">${med.name}</div>
-        <div class="tl-bar-wrap">
-          <div class="tl-bar current" style="left:${startPct}%;width:${width}%">${med.supply}d</div>
-          <div class="tl-bar synced" style="left:${syncStartPct}%;width:${syncWidth}%">→ ${med.supply}d</div>
-        </div>
+    const seg2Class = (p.fillType === 'anchor' || p.fillType === 'synced') ? 'seg-sync' : (p.fillType === 'short' ? 'seg-short' : 'seg-sync');
+
+    const todayPct = pct(today).toFixed(2);
+    const syncPct  = pct(syncTarget).toFixed(2);
+
+    html += `<div class="tl-row">
+      <div class="tl-label" title="${p.name}">${p.name}</div>
+      <div class="tl-track">
+        <div class="tl-seg seg-past" style="left:${s1L}%;width:${s1W}%">${p.supply}d</div>
+        <div class="tl-seg ${seg2Class}" style="left:${s2L}%;width:${s2W}%">${p.fillDays}d</div>
+        <div class="tl-vline today" style="left:${todayPct}%"></div>
+        <div class="tl-vline sync"  style="left:${syncPct}%"></div>
       </div>
-    `;
-  }
+    </div>`;
+  });
 
-  // Add axis markers
-  const todayPct = 0;
-  const syncPct = pct(syncDate);
-  const nextPct = pct(nextSyncDate);
+  // Axis
+  const todayPct = pct(today).toFixed(2);
+  const syncPct  = pct(syncTarget).toFixed(2);
+  html += `<div class="tl-axis" style="margin-left:calc(130px + 12px)">
+    <div class="tl-tick today" style="left:${todayPct}%">Today</div>
+    <div class="tl-tick sync"  style="left:${syncPct}%">${fd(syncTarget)}</div>
+  </div>`;
 
-  html += `
-    <div style="position:relative;height:20px;margin-left:172px;">
-      <div style="position:absolute;left:${todayPct}%;font-size:0.55rem;color:var(--ink-3);transform:translateX(-50%)">TODAY</div>
-      <div style="position:absolute;left:${syncPct}%;font-size:0.55rem;color:var(--green);transform:translateX(-50%)">${fmtShort(syncDate)}</div>
-      <div style="position:absolute;left:${nextPct}%;font-size:0.55rem;color:var(--green);transform:translateX(-50%)">${fmtShort(nextSyncDate)}</div>
-    </div>
-  `;
+  // Legend
+  html += `<div class="tl-legend">
+    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--surface2);border:1px solid var(--border)"></div>Current fill</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:#b07a1a"></div>Short (bridge) fill</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent)"></div>Anchor / sync fill</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent2);height:4px;margin-top:5px;border-radius:2px"></div>Today</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent);height:4px;margin-top:5px;border-radius:2px"></div>Sync target</div>
+  </div>`;
 
   wrap.innerHTML = html;
-  container.appendChild(wrap);
+  block.appendChild(wrap);
+  out.appendChild(block);
 }
 
-// ── LOAD EXAMPLES ──
-function loadExamples() {
-  const examples = [
-    { name: 'Metformin 500mg', daysAgo: 75, supply: 90 },
-    { name: 'Lisinopril 10mg', daysAgo: 20, supply: 30 },
-    { name: 'Atorvastatin 40mg', daysAgo: 50, supply: 90 },
-  ];
-  const today = parseDate(document.getElementById('today').value);
-  examples.forEach(ex => {
-    addRx();
-    const id = counter;
-    document.getElementById(`name-${id}`).value = ex.name;
-    const fillDate = addDays(today, -ex.daysAgo);
-    document.getElementById(`date-${id}`).value = toISO(fillDate);
-    document.getElementById(`supply-${id}`).value = ex.supply;
-  });
-}
-
-refreshEmpty();
+updateEmptyState();
 </script>
 </body>
 </html>
