@@ -47,7 +47,7 @@ header h1 {
 header h1 span { color: #7ecb95; }
 header p { font-size: 0.7rem; color: #a09a94; text-transform: uppercase; letter-spacing: 0.1em; }
 
-main { max-width: 1020px; margin: 0 auto; padding: 40px 24px 80px; }
+main { max-width: 1160px; margin: 0 auto; padding: 40px 24px 80px; }
 
 .section-label {
   font-size: 0.65rem; font-weight: 500; text-transform: uppercase;
@@ -83,8 +83,8 @@ input[type="number"] { width: 90px; }
   border-radius: var(--radius); padding: 20px 24px;
   box-shadow: var(--shadow);
   display: grid;
-  /* name | last-fill | OR-divider | pills-remaining | days-supply | remove */
-  grid-template-columns: 1fr 160px auto 160px 120px auto;
+  /* name | last-fill | OR-divider | pills-remaining | days-supply | toggles | remove */
+  grid-template-columns: 1fr 160px auto 160px 110px auto auto;
   align-items: end; gap: 16px;
   transition: border-color 0.2s, box-shadow 0.2s;
   animation: slideIn 0.2s ease;
@@ -247,6 +247,7 @@ tr:hover td { background: var(--accent-light); }
 .pill-green  { background: var(--accent); }
 .pill-amber  { background: #b07a1a; }
 .pill-blue   { background: var(--blue); }
+.pill-purple { background: #6b3fa0; }
 
 .type-badge {
   font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em;
@@ -255,6 +256,7 @@ tr:hover td { background: var(--accent-light); }
 .type-short   { background: var(--accent2-light); color: var(--accent2); }
 .type-sync    { background: var(--accent-light);  color: var(--accent); }
 .type-normal  { background: var(--blue-light);    color: var(--blue); }
+.type-fixed   { background: #f0eaf8;              color: #6b3fa0; }
 
 /* DERIVED badge on the name col */
 .derived-badge {
@@ -262,6 +264,24 @@ tr:hover td { background: var(--accent-light); }
   padding: 2px 7px; border-radius: 99px; margin-left: 6px;
   background: var(--blue-light); color: var(--blue); vertical-align: middle;
 }
+
+/* PER-CARD TOGGLES (never fill early + fixed supply) */
+.rx-toggles {
+  align-self: end; display: flex; flex-direction: column; gap: 8px; white-space: nowrap;
+}
+.rx-toggle-label {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.75rem; cursor: pointer; user-select: none;
+}
+.rx-toggle-cb { width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+
+/* RESULTS TABLE name-col badges */
+.never-early-badge, .fixed-supply-badge {
+  font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 2px 7px; border-radius: 99px; margin-left: 6px; vertical-align: middle;
+}
+.never-early-badge  { background: var(--accent2-light); color: var(--accent2); }
+.fixed-supply-badge { background: #f0eaf8; color: #6b3fa0; }
 
 /* TIMELINE */
 .timeline-wrap { padding: 24px; }
@@ -279,6 +299,7 @@ tr:hover td { background: var(--accent-light); }
 .seg-short  { background: #b07a1a; }
 .seg-sync   { background: var(--accent); }
 .seg-derived { background: var(--blue); }
+.seg-fixed  { background: #6b3fa0; }
 .tl-vline { position: absolute; top: -4px; bottom: -4px; width: 2px; z-index: 10; }
 .tl-vline.today { background: var(--accent2); }
 .tl-vline.sync  { background: var(--accent); }
@@ -296,7 +317,7 @@ tr:hover td { background: var(--accent-light); }
 .tl-leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: var(--ink-muted); }
 .tl-leg-swatch { width: 14px; height: 14px; border-radius: 2px; }
 
-@media (max-width: 820px) {
+@media (max-width: 960px) {
   header { padding: 16px 20px; }
   .rx-card {
     grid-template-columns: 1fr 1fr;
@@ -305,6 +326,7 @@ tr:hover td { background: var(--accent-light); }
   .rx-card > *:first-child { grid-column: 1 / -1; }
   .or-divider { display: none; }
   .rx-field-pills { grid-column: 2; }
+  .rx-toggles { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
   .summary-bar { grid-template-columns: 1fr; }
   .summary-item { border-right: none; border-bottom: 1px solid var(--border); }
   .tl-label { width: 80px; font-size: 0.6rem; }

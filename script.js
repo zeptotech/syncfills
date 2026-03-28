@@ -137,7 +137,7 @@ function addRx() {
     <div class="field-group" style="grid-column:1">
       <div class="rx-num">Rx #${id}</div>
       <label>Drug / Prescription Name</label>
-      <input type="text" placeholder="e.g. Metformin 500mg" id="name-${id}">
+      <input type="text" placeholder="e.g. Metformin 500mg" id="name-${id}" autocomplete="off">
     </div>
 
     <div class="rx-field-date field-group">
@@ -153,14 +153,25 @@ function addRx() {
 
     <div class="rx-field-pills field-group">
       <label>Pills Remaining</label>
-      <input type="number" id="pills-${id}" min="0" max="9999" placeholder="e.g. 24"
+      <input type="number" id="pills-${id}" min="0" max="9999" placeholder="#"
              style="width:140px">
     </div>
 
     <div class="field-group">
       <label>Days Supply</label>
-      <input type="number" id="supply-${id}" min="1" max="365" placeholder="90"
+      <input type="number" id="supply-${id}" min="1" max="365" placeholder="#"
              style="width:100px">
+    </div>
+
+    <div class="rx-toggles">
+      <label class="rx-toggle-label">
+        <input type="checkbox" id="noearly-${id}" class="rx-toggle-cb">
+        Never fill early
+      </label>
+      <label class="rx-toggle-label">
+        <input type="checkbox" id="fixedsupply-${id}" class="rx-toggle-cb">
+        Fixed days supply
+      </label>
     </div>
 
     <button class="btn-remove" onclick="removeRx(${id})" title="Remove">×</button>
@@ -295,8 +306,12 @@ function calculate() {
       derived  = true;
     }
 
-    const expiry = addDays(lastFill, supply);
-    meds.push({ id, name, lastFill, supply, expiry, derived });
+    const expiry      = addDays(lastFill, supply);
+    // Read per-card toggles
+    const neverEarly  = document.getElementById(`noearly-${id}`).checked;
+    // fixedSupply: always dispense exactly med.supply days — never a bridge fill
+    const fixedSupply = document.getElementById(`fixedsupply-${id}`).checked;
+    meds.push({ id, name, lastFill, supply, expiry, derived, neverEarly, fixedSupply });
   }
 
   if (hasError) return;
@@ -316,16 +331,19 @@ function calculate() {
 
   // ── Step 3: build the fill plan for each med ─────────────────────────
   const plans = meds.map(med => {
-    // The earliest this med can be refilled (grace days before it runs out),
-    // but never before today (can't fill in the past).
-    const earliestFill   = addDays(med.expiry, -grace);
+    // The earliest this med can be refilled. If "Never fill early" is checked,
+    // ignore the grace period and only allow filling on/after the exact expiry.
+    // Otherwise apply the normal grace window (expiry − grace days).
+    // Either way, we can't fill in the past, so floor at today.
+    const earliestFill   = med.neverEarly ? med.expiry : addDays(med.expiry, -grace);
     const fillDate       = earliestFill < today ? today : earliestFill;
 
     // How many days between this med's fill date and syncExpiry.
-    // Bridge fills target syncExpiry as their new expiry so their fill window
-    // opens on syncTarget (= syncExpiry − grace) — exactly when the anchor
-    // becomes fillable. That way everyone fills together on syncTarget.
-    const daysToSync     = diffDays(fillDate, syncExpiry);
+    // Bridge fills target syncTarget as their new expiry. This means:
+    //   - bridge fill expires on syncTarget (e.g. May 20)  → last day of its fill window
+    //   - anchor becomes fillable on syncTarget             → first day of its fill window
+    // Both windows overlap exactly on syncTarget, so everyone fills together that day.
+    const daysToSync     = diffDays(fillDate, syncTarget);
 
     // The anchor is the med whose expiry defines syncExpiry.
     // If two meds share the same max expiry, both will be isAnchor.
@@ -336,22 +354,30 @@ function calculate() {
 
     let fillType, shortDays, fillDateUsed;
 
-    if (isAnchor || daysToSync <= 0) {
+    if (med.fixedSupply) {
+      // Fixed-supply meds always dispense exactly their original days supply.
+      // They can't be shortened into a bridge fill, so they won't align to
+      // the sync date — they run on their own independent schedule.
+      shortDays    = med.supply;
+      fillType     = 'fixed';
+      fillDateUsed = fillDate;
+    } else if (isAnchor || daysToSync <= 0) {
       // This med either IS the anchor, or its fill window already opens at/after
       // the sync date — fill it for the full standard supply.
       fillType = isAnchor ? 'anchor' : 'normal';
       shortDays = stdDays;
       fillDateUsed = fillDate;
     } else {
-      // Bridge fill: dispense exactly daysToSync days so this med expires on
-      // syncExpiry. Its fill window then opens on syncExpiry − grace = syncTarget,
-      // the same day the anchor becomes fillable — so everyone fills together early.
+      // Bridge fill: exactly enough days so this med expires on syncTarget.
+      // On syncTarget the anchor is also first fillable, so everyone goes
+      // to the pharmacy on the same day.
       shortDays = daysToSync;
       fillType = 'short';
       fillDateUsed = fillDate;
     }
 
     const newExpiry = addDays(fillDateUsed, shortDays);
+    // neverEarly is spread from ...med but listed explicitly for clarity
     return { ...med, fillDate: fillDateUsed, fillDays: shortDays, fillType, newExpiry, offsetFromSync, syncExpiry };
   });
 
@@ -442,9 +468,12 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   const tbody = document.createElement('tbody');
 
   plans.forEach((p, i) => {
-    // diffLabel shows how this fill compares to the standard supply length
-    const diff = p.fillDays - stdDays;
-    const diffLabel = diff === 0 ? 'Standard fill'
+    // diffLabel shows how this fill compares to the standard supply length.
+    // Fixed-supply meds compare against their own supply, not the standard.
+    const compareBase = p.fixedSupply ? p.supply : stdDays;
+    const diff = p.fillDays - compareBase;
+    const diffLabel = p.fixedSupply ? `Fixed ${p.supply}d supply`
+      : diff === 0 ? 'Standard fill'
       : diff > 0 ? `+${diff}d vs std`
       : `${diff}d vs std (short)`;
 
@@ -453,7 +482,9 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
 
     // Badge and label styles vary by fill type
     let badgeClass, typeClass, typeLabel;
-    if (p.fillType === 'short') {
+    if (p.fillType === 'fixed') {
+      badgeClass = 'pill-purple'; typeClass = 'type-fixed'; typeLabel = 'Fixed Supply';
+    } else if (p.fillType === 'short') {
       badgeClass = 'pill-amber'; typeClass = 'type-short'; typeLabel = 'Short Fill';
     } else if (p.fillType === 'anchor') {
       badgeClass = 'pill-green'; typeClass = 'type-sync'; typeLabel = 'Anchor';
@@ -470,10 +501,18 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
       ? `<span class="derived-badge" title="Estimated from pills remaining">est.</span>`
       : '';
 
+    const neverEarlyTag = p.neverEarly
+      ? `<span class="never-early-badge" title="Never fill early — fills on exact due date only">no early fill</span>`
+      : '';
+
+    const fixedSupplyTag = p.fixedSupply
+      ? `<span class="fixed-supply-badge" title="Fixed days supply — always dispensed for exactly ${p.supply} days">fixed ${p.supply}d</span>`
+      : '';
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="color:var(--ink-muted);font-size:0.75rem">${i+1}</td>
-      <td style="font-weight:500">${p.name}${derivedTag}</td>
+      <td style="font-weight:500">${p.name}${derivedTag}${neverEarlyTag}${fixedSupplyTag}</td>
       <td>${fd(p.expiry)}</td>
       <td style="font-weight:500">${fd(p.fillDate)}</td>
       <td>
@@ -548,7 +587,9 @@ function renderTimeline(out, plans, grace, syncTarget, syncExpiry, today) {
 
     const seg1Class = p.derived ? 'seg-derived' : 'seg-past';
     const seg2Class = (p.fillType === 'anchor' || p.fillType === 'synced') ? 'seg-sync'
-                    : p.fillType === 'short' ? 'seg-short' : 'seg-sync';
+                    : p.fillType === 'short'  ? 'seg-short'
+                    : p.fillType === 'fixed'  ? 'seg-fixed'
+                    : 'seg-sync';
 
     // Per-row fill date marker (purple line + date label above the track).
     // Skipped for the anchor because the green sync line already marks its fill date.
@@ -583,6 +624,7 @@ function renderTimeline(out, plans, grace, syncTarget, syncExpiry, today) {
     <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--blue)"></div>Current fill (estimated from pills)</div>
     <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:#b07a1a"></div>Short (bridge) fill</div>
     <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent)"></div>Anchor / sync fill</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:#6b3fa0"></div>Fixed supply fill</div>
     <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent2);height:4px;margin-top:5px;border-radius:2px"></div>Today</div>
     <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:#7c4d9e;height:4px;margin-top:5px;border-radius:2px"></div>Recommended fill date</div>
     <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent);height:4px;margin-top:5px;border-radius:2px"></div>Sync target</div>
