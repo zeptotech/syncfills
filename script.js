@@ -206,6 +206,7 @@ function clearAll() {
   document.getElementById('results').innerHTML = '';
   document.getElementById('results').style.display = 'none';
   document.getElementById('errorMsg').style.display = 'none';
+  document.getElementById('printBtn').style.display = 'none';
   updateEmptyState();
 }
 
@@ -399,13 +400,7 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   printHeader.innerHTML = `<h2>RxSync — Prescription Synchronization Plan</h2><p>Generated: ${fd(today)}</p>`;
   out.appendChild(printHeader);
 
-  // Print button (shown on screen, hidden when printing)
-  const printBtn = document.createElement('button');
-  printBtn.className = 'btn btn-print';
-  printBtn.textContent = '⎙ Print / Save PDF';
-  printBtn.style.marginBottom = '20px';
-  printBtn.onclick = () => window.print();
-  out.appendChild(printBtn);
+  document.getElementById('printBtn').style.display = '';
 
   // Quick counts used in the summary bar and conditional notice
   const nShort   = plans.filter(p => p.fillType === 'short').length;
@@ -474,8 +469,8 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
       <th>Prescription</th>
       <th>Current Expiry</th>
       <th>Recommended Fill Date</th>
-      <th>Days Supply</th>
-      <th>New Expiry After Fill</th>
+      <th>Dispense Days Supply</th>
+      <th>Next Due for Refill</th>
       <th>Type</th>
     </tr></thead>
   `;
@@ -551,7 +546,91 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   out.appendChild(afterNote);
 
   renderTimeline(out, plans, grace, syncTarget, syncExpiry, today);
+  renderSchedule(out, plans, stdDays, syncTarget, today);
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── SCHEDULE ──────────────────────────────────────────────────────────────
+// renderSchedule builds a chronological pickup list sorted by fill date.
+// Rows sharing the same date are visually grouped under a date header.
+function renderSchedule(out, plans, stdDays, syncTarget, today) {
+  const block = document.createElement('div');
+  block.className = 'section-block';
+
+  const blockHead = document.createElement('div');
+  blockHead.className = 'section-block-header';
+  blockHead.innerHTML = `<h3>Pickup Schedule</h3><span class="event-date-label">Sorted by fill date</span>`;
+  block.appendChild(blockHead);
+
+  // Sort plans by fill date ascending, then by name for ties
+  const sorted = [...plans].sort((a, b) => {
+    const diff = a.fillDate - b.fillDate;
+    return diff !== 0 ? diff : a.name.localeCompare(b.name);
+  });
+
+  // Group into date buckets
+  const groups = [];
+  for (const p of sorted) {
+    const key = p.fillDate.getTime();
+    const last = groups[groups.length - 1];
+    if (last && last.key === key) {
+      last.items.push(p);
+    } else {
+      groups.push({ key, date: p.fillDate, items: [p] });
+    }
+  }
+
+  const table = document.createElement('table');
+  table.innerHTML = `
+    <thead><tr>
+      <th>Fill Date</th>
+      <th>Prescription</th>
+      <th>Dispense Days Supply</th>
+      <th>Due for Refill</th>
+    </tr></thead>
+  `;
+  const tbody = document.createElement('tbody');
+
+  groups.forEach(group => {
+    const isSync = group.date.getTime() === syncTarget.getTime();
+    const isPast = group.date < today;
+
+    group.items.forEach((p, idx) => {
+      let badgeClass;
+      if (p.fillType === 'fixed')       badgeClass = 'pill-purple';
+      else if (p.fillType === 'short')  badgeClass = 'pill-amber';
+      else if (p.fillType === 'anchor') badgeClass = 'pill-green';
+      else                              badgeClass = 'pill-blue';
+
+      const tr = document.createElement('tr');
+      if (isSync) tr.classList.add('schedule-row-sync');
+      if (isPast) tr.classList.add('schedule-row-past');
+
+      // Only show the date cell on the first row of each group; span the rest
+      const dateCell = idx === 0
+        ? `<td rowspan="${group.items.length}" class="schedule-date-cell${isSync ? ' schedule-date-sync' : ''}${isPast ? ' schedule-date-past' : ''}">
+             ${fd(group.date)}
+             ${isSync ? '<div class="schedule-sync-tag">Sync date</div>' : ''}
+             ${isPast ? '<div class="schedule-past-tag">Fill now</div>' : ''}
+           </td>`
+        : '';
+
+      tr.innerHTML = `
+        ${dateCell}
+        <td style="font-weight:500">${p.name}</td>
+        <td>
+          <span class="pill-badge ${badgeClass}">${p.fillDays}d</span>
+          ${p.fillDays < stdDays ? '<div style="font-size:0.7rem;color:var(--ink-muted);margin-top:3px">Short fill</div>' : ''}
+        </td>
+        <td>${fd(p.newExpiry)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  });
+
+  table.appendChild(tbody);
+  block.appendChild(table);
+  out.appendChild(block);
 }
 
 // ── TIMELINE ──────────────────────────────────────────────────────────────

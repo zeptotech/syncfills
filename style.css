@@ -317,6 +317,25 @@ tr:hover td { background: var(--accent-light); }
 .tl-leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: var(--ink-muted); }
 .tl-leg-swatch { width: 14px; height: 14px; border-radius: 2px; }
 
+/* SCHEDULE MODULE */
+.schedule-date-cell {
+  font-weight: 500; white-space: nowrap; vertical-align: top !important;
+  padding-top: 16px !important; border-right: 1px solid var(--border);
+  color: var(--ink);
+}
+.schedule-date-sync { color: var(--accent) !important; font-weight: 700 !important; }
+.schedule-date-past { color: var(--accent2) !important; }
+.schedule-sync-tag, .schedule-past-tag {
+  font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em;
+  margin-top: 4px; font-weight: 500;
+}
+.schedule-sync-tag { color: var(--accent); }
+.schedule-past-tag { color: var(--accent2); }
+.schedule-row-sync td { background: var(--accent-light); }
+.schedule-row-past td { background: var(--accent2-light); }
+.schedule-row-sync:hover td { background: var(--accent-light) !important; }
+.schedule-row-past:hover td { background: var(--accent2-light) !important; }
+
 /* PRINT BUTTON */
 .btn-print {
   background: var(--blue); color: #fff; border: 1.5px solid var(--blue);
