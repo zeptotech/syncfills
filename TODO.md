@@ -2,7 +2,7 @@
 - Way to import/export sync information
 - ~~Printout version (visuals)~~
 - ~~Toggle prescription setting where it cannot be filled early~~
-- List fill dates (and med, quantity)
+- ~~List fill dates (and med, quantity)~~
 
 
 # Recommendations from AI
