@@ -393,6 +393,20 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   out.innerHTML = '';
   out.style.display = 'block';
 
+  // Print-only header (hidden on screen, shown when printing)
+  const printHeader = document.createElement('div');
+  printHeader.className = 'print-header';
+  printHeader.innerHTML = `<h2>RxSync — Prescription Synchronization Plan</h2><p>Generated: ${fd(today)}</p>`;
+  out.appendChild(printHeader);
+
+  // Print button (shown on screen, hidden when printing)
+  const printBtn = document.createElement('button');
+  printBtn.className = 'btn btn-print';
+  printBtn.textContent = '⎙ Print / Save PDF';
+  printBtn.style.marginBottom = '20px';
+  printBtn.onclick = () => window.print();
+  out.appendChild(printBtn);
+
   // Quick counts used in the summary bar and conditional notice
   const nShort   = plans.filter(p => p.fillType === 'short').length;
   const nSynced  = plans.filter(p => p.fillType === 'anchor' || p.fillType === 'synced').length;
@@ -620,14 +634,14 @@ function renderTimeline(out, plans, grace, syncTarget, syncExpiry, today) {
 
   // Legend explaining each colour/line type
   html += `<div class="tl-legend">
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--surface2);border:1px solid var(--border)"></div>Current fill (date-based)</div>
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--blue)"></div>Current fill (estimated from pills)</div>
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:#b07a1a"></div>Short (bridge) fill</div>
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent)"></div>Anchor / sync fill</div>
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:#6b3fa0"></div>Fixed supply fill</div>
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent2);height:4px;margin-top:5px;border-radius:2px"></div>Today</div>
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:#7c4d9e;height:4px;margin-top:5px;border-radius:2px"></div>Recommended fill date</div>
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent);height:4px;margin-top:5px;border-radius:2px"></div>Sync target</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch swatch-past" style="background:var(--surface2);border:1px solid var(--border)"></div>Current fill (date-based)</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch swatch-derived" style="background:var(--blue)"></div>Current fill (estimated from pills)</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch swatch-short" style="background:#b07a1a"></div>Short (bridge) fill</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch swatch-sync" style="background:var(--accent)"></div>Anchor / sync fill</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch swatch-fixed" style="background:#6b3fa0"></div>Fixed supply fill</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch swatch-today" style="background:var(--accent2);height:4px;margin-top:5px;border-radius:2px"></div>Today</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch swatch-fill-line" style="background:#7c4d9e;height:4px;margin-top:5px;border-radius:2px"></div>Recommended fill date</div>
+    <div class="tl-leg-item"><div class="tl-leg-swatch swatch-sync-line" style="background:var(--accent);height:4px;margin-top:5px;border-radius:2px"></div>Sync target</div>
   </div>`;
 
   wrap.innerHTML = html;
