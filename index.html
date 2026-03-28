@@ -6,231 +6,512 @@
 <title>RxSync — Prescription Synchronization Tool</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #f4f1eb;
-  --surface: #ffffff;
-  --surface2: #edeae3;
-  --ink: #1a1814;
-  --ink-muted: #6b6660;
-  --accent: #2d5a3d;
-  --accent-light: #e8f0eb;
-  --accent2: #c8440a;
-  --accent2-light: #fdf0eb;
-  --blue: #2a4d7a;
-  --blue-light: #e8eef5;
-  --border: #d4d0c8;
-  --shadow: 0 2px 12px rgba(26,24,20,0.08);
-  --shadow-lg: 0 8px 32px rgba(26,24,20,0.12);
-  --radius: 4px;
-}
+  :root {
+    --bg: #f4f1eb;
+    --surface: #ffffff;
+    --surface2: #edeae3;
+    --ink: #1a1814;
+    --ink-muted: #6b6660;
+    --accent: #2d5a3d;
+    --accent-light: #e8f0eb;
+    --accent2: #c8440a;
+    --accent2-light: #fdf0eb;
+    --border: #d4d0c8;
+    --shadow: 0 2px 12px rgba(26,24,20,0.08);
+    --shadow-lg: 0 8px 32px rgba(26,24,20,0.12);
+    --radius: 4px;
+  }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-body {
-  font-family: 'DM Mono', monospace;
-  background: var(--bg);
-  color: var(--ink);
-  min-height: 100vh;
-}
+  body {
+    font-family: 'DM Mono', monospace;
+    background: var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    padding: 0;
+  }
 
-header {
-  background: var(--ink);
-  color: var(--bg);
-  padding: 20px 40px;
-  display: flex;
-  align-items: baseline;
-  gap: 16px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  border-bottom: 3px solid var(--accent);
-}
-header h1 {
-  font-family: 'Syne', sans-serif;
-  font-size: 1.5rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  color: #fff;
-}
-header h1 span { color: #7ecb95; }
-header p { font-size: 0.7rem; color: #a09a94; text-transform: uppercase; letter-spacing: 0.1em; }
+  /* HEADER */
+  header {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 20px 40px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 3px solid var(--accent);
+  }
 
-main { max-width: 980px; margin: 0 auto; padding: 40px 24px 80px; }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
 
-.section-label {
-  font-size: 0.65rem; font-weight: 500; text-transform: uppercase;
-  letter-spacing: 0.15em; color: var(--ink-muted); margin-bottom: 12px;
-  display: flex; align-items: center; gap: 10px;
-}
-.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  header h1 span { color: #7ecb95; }
 
-/* GRACE CARD */
-.sync-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 24px; margin-bottom: 32px;
-  box-shadow: var(--shadow); display: flex; align-items: flex-end; gap: 24px; flex-wrap: wrap;
-}
-.field-group { display: flex; flex-direction: column; gap: 6px; }
-.field-group label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted); }
-.leeway-note { font-size: 0.7rem; color: var(--ink-muted); margin-top: 4px; }
+  header p {
+    font-size: 0.7rem;
+    color: #a09a94;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
 
-input[type="date"], input[type="number"], input[type="text"] {
-  font-family: 'DM Mono', monospace; font-size: 0.9rem;
-  padding: 10px 14px; border: 1.5px solid var(--border);
-  border-radius: var(--radius); background: var(--surface);
-  color: var(--ink); outline: none; transition: border-color 0.15s;
-}
-input:focus { border-color: var(--accent); }
-input[type="number"] { width: 90px; }
+  /* LAYOUT */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
 
-/* RX CARDS */
-.rx-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-.rx-card {
-  background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--radius); padding: 20px 24px;
-  box-shadow: var(--shadow);
-  display: grid; grid-template-columns: 1fr 180px 160px auto;
-  align-items: end; gap: 20px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  animation: slideIn 0.2s ease;
-}
-@keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-.rx-card:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); }
-.rx-card input[type="text"] { width: 100%; }
-.rx-num { font-family: 'Syne', sans-serif; font-size: 0.65rem; font-weight: 700; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+  /* SECTION LABEL */
+  .section-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-muted);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
 
-.btn-remove {
-  background: none; border: 1.5px solid var(--border); border-radius: var(--radius);
-  color: var(--ink-muted); width: 36px; height: 36px; cursor: pointer;
-  font-size: 1.1rem; display: flex; align-items: center; justify-content: center;
-  transition: all 0.15s; align-self: flex-end;
-}
-.btn-remove:hover { background: var(--accent2-light); border-color: var(--accent2); color: var(--accent2); }
+  /* SYNC DATE CARD */
+  .sync-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 32px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
 
-/* BUTTONS */
-.actions { display: flex; gap: 12px; margin-bottom: 40px; flex-wrap: wrap; }
-.btn {
-  font-family: 'DM Mono', monospace; font-size: 0.8rem; font-weight: 500;
-  padding: 12px 24px; border-radius: var(--radius); border: none;
-  cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em; transition: all 0.15s;
-}
-.btn-add { background: var(--surface); border: 1.5px solid var(--border); color: var(--ink); }
-.btn-add:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
-.btn-calculate { background: var(--accent); color: #fff; border: 1.5px solid var(--accent); letter-spacing: 0.1em; }
-.btn-calculate:hover { background: #1e3f2b; border-color: #1e3f2b; }
-.btn-clear { background: none; border: 1.5px solid var(--border); color: var(--ink-muted); }
-.btn-clear:hover { background: var(--accent2-light); border-color: var(--accent2); color: var(--accent2); }
+  .field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
 
-/* EMPTY / ERROR */
-.empty-state {
-  text-align: center; padding: 48px; color: var(--ink-muted); font-size: 0.8rem;
-  border: 1.5px dashed var(--border); border-radius: var(--radius); margin-bottom: 20px;
-}
-.empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
-.error-msg {
-  background: var(--accent2-light); border: 1.5px solid var(--accent2); color: var(--accent2);
-  border-radius: var(--radius); padding: 12px 18px; font-size: 0.8rem; margin-bottom: 16px; display: none;
-}
+  .field-group label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-muted);
+  }
 
-/* RESULTS */
-#results { display: none; animation: fadeUp 0.3s ease; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  input[type="date"], input[type="number"], input[type="text"] {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  input:focus { border-color: var(--accent); }
+  input[type="number"] { width: 90px; }
 
-/* SUMMARY BAR */
-.summary-bar {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--radius); margin-bottom: 20px;
-  overflow: hidden; box-shadow: var(--shadow);
-}
-.summary-item { padding: 18px 24px; border-right: 1px solid var(--border); text-align: center; }
-.summary-item:last-child { border-right: none; }
-.summary-value { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 4px; }
-.summary-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-muted); }
+  .leeway-note {
+    font-size: 0.7rem;
+    color: var(--ink-muted);
+    margin-top: 4px;
+  }
 
-/* SYNC BANNER */
-.sync-banner {
-  background: var(--ink); color: #fff; padding: 20px 28px; border-radius: var(--radius);
-  margin-bottom: 20px; box-shadow: var(--shadow-lg);
-  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
-}
-.sync-banner h2 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
-.sync-banner-date { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; color: #7ecb95; }
-.sync-banner-sub { font-size: 0.7rem; color: #a09a94; margin-top: 2px; }
+  /* PRESCRIPTION LIST */
+  .rx-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
 
-/* FILL EVENTS TABLE */
-.section-block {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow-lg); margin-bottom: 24px;
-}
-.section-block-header {
-  background: var(--surface2); padding: 14px 24px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.section-block-header h3 { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; }
-.event-date-label { font-size: 0.7rem; color: var(--ink-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .rx-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    animation: slideIn 0.2s ease;
+  }
 
-table { width: 100%; border-collapse: collapse; }
-th {
-  font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em;
-  color: var(--ink-muted); padding: 10px 20px; text-align: left;
-  background: var(--surface2); border-bottom: 1px solid var(--border);
-}
-td { padding: 14px 20px; font-size: 0.83rem; border-bottom: 1px solid var(--surface2); vertical-align: middle; }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: var(--accent-light); }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
 
-.pill-badge {
-  display: inline-block; font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700;
-  padding: 4px 14px; border-radius: 99px; min-width: 60px; text-align: center; color: #fff;
-}
-.pill-green  { background: var(--accent); }
-.pill-amber  { background: #b07a1a; }
-.pill-blue   { background: var(--blue); }
+  .rx-card:hover {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-lg);
+  }
 
-.type-badge {
-  font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em;
-  padding: 3px 10px; border-radius: 99px; font-weight: 500; white-space: nowrap;
-}
-.type-short   { background: var(--accent2-light); color: var(--accent2); }
-.type-sync    { background: var(--accent-light);  color: var(--accent); }
-.type-normal  { background: var(--blue-light);    color: var(--blue); }
+  /* Card top row: name + toggle + remove */
+  .rx-card-top {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: end;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
 
-/* TIMELINE */
-.timeline-wrap { padding: 24px; }
-.tl-title { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--ink-muted); margin-bottom: 16px; }
-.tl-row { display: flex; align-items: center; margin-bottom: 10px; gap: 12px; }
-.tl-label { font-size: 0.72rem; width: 130px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink-muted); }
-.tl-track { flex: 1; height: 28px; background: var(--surface2); border-radius: 3px; position: relative; overflow: visible; }
-.tl-seg {
-  position: absolute; top: 0; height: 100%; border-radius: 3px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.6rem; font-weight: 500; color: rgba(255,255,255,0.85);
-  overflow: hidden; min-width: 2px;
-}
-.seg-past   { background: var(--surface3,#ddd); border: 1px solid var(--border); color: var(--ink-muted); }
-.seg-short  { background: #b07a1a; }
-.seg-sync   { background: var(--accent); }
-.tl-vline { position: absolute; top: -4px; bottom: -4px; width: 2px; z-index: 10; }
-.tl-vline.today { background: var(--accent2); }
-.tl-vline.sync  { background: var(--accent); }
-.tl-axis { position: relative; height: 20px; margin-left: calc(130px + 12px); margin-bottom: 8px; }
-.tl-tick { position: absolute; font-size: 0.6rem; transform: translateX(-50%); white-space: nowrap; }
-.tl-tick.today { color: var(--accent2); }
-.tl-tick.sync  { color: var(--accent); font-weight: 500; }
-.tl-legend { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
-.tl-leg-item { display: flex; align-items: center; gap: 6px; font-size: 0.65rem; color: var(--ink-muted); }
-.tl-leg-swatch { width: 14px; height: 14px; border-radius: 2px; }
+  .rx-card-top .field-group { flex: 1; }
+  .rx-card-top input[type="text"] { width: 100%; }
 
-@media (max-width: 700px) {
-  header { padding: 16px 20px; }
-  .rx-card { grid-template-columns: 1fr 1fr; }
-  .rx-card > *:nth-child(1) { grid-column: 1 / -1; }
-  .summary-bar { grid-template-columns: 1fr; }
-  .summary-item { border-right: none; border-bottom: 1px solid var(--border); }
-  .tl-label { width: 80px; font-size: 0.6rem; }
-}
+  /* Card bottom row: dynamic input fields */
+  .rx-card-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    align-items: end;
+    gap: 20px;
+  }
+
+  /* The date-or-pills switcher slot */
+  .input-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .rx-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+  }
+
+  /* INPUT MODE TOGGLE */
+  .mode-toggle {
+    display: flex;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    height: 36px;
+    flex-shrink: 0;
+    align-self: flex-end;
+  }
+
+  .mode-toggle button {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0 10px;
+    border: none;
+    background: var(--surface);
+    color: var(--ink-muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .mode-toggle button:not(:last-child) {
+    border-right: 1.5px solid var(--border);
+  }
+
+  .mode-toggle button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .mode-toggle button:hover:not(.active) {
+    background: var(--accent-light);
+    color: var(--accent);
+  }
+
+  .btn-remove {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--ink-muted);
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+    align-self: flex-end;
+  }
+  .btn-remove:hover {
+    background: var(--accent2-light);
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  /* Fade animation for input slot swap */
+  .input-slot-inner {
+    animation: slotFade 0.18s ease;
+  }
+  @keyframes slotFade {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Mode hint badge */
+  .mode-hint {
+    font-size: 0.62rem;
+    color: var(--ink-muted);
+    margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .mode-hint::before {
+    content: '●';
+    font-size: 0.5rem;
+    color: var(--accent);
+  }
+
+  /* ADD + CALCULATE BUTTONS */
+  .actions {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 12px 24px;
+    border-radius: var(--radius);
+    border: none;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    transition: all 0.15s;
+  }
+
+  .btn-add {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    color: var(--ink);
+  }
+  .btn-add:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-calculate {
+    background: var(--accent);
+    color: #fff;
+    border: 1.5px solid var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .btn-calculate:hover {
+    background: #1e3f2b;
+    border-color: #1e3f2b;
+  }
+
+  .btn-clear {
+    background: none;
+    border: 1.5px solid var(--border);
+    color: var(--ink-muted);
+  }
+  .btn-clear:hover {
+    background: var(--accent2-light);
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  /* RESULTS */
+  #results {
+    display: none;
+    animation: fadeUp 0.3s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .results-header {
+    background: var(--ink);
+    color: #fff;
+    padding: 20px 28px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .results-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .sync-target-date {
+    font-size: 0.75rem;
+    color: #7ecb95;
+  }
+
+  .results-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 var(--radius) var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .results-table table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .results-table th {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-muted);
+    padding: 12px 20px;
+    text-align: left;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .results-table td {
+    padding: 16px 20px;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--surface2);
+    vertical-align: middle;
+  }
+
+  .results-table tr:last-child td { border-bottom: none; }
+  .results-table tr:hover td { background: var(--accent-light); }
+
+  .rx-name-cell { font-weight: 500; }
+
+  .pill-badge {
+    display: inline-block;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    background: var(--accent);
+    color: #fff;
+    padding: 4px 14px;
+    border-radius: 99px;
+    min-width: 64px;
+    text-align: center;
+  }
+
+  .pill-badge.same  { background: var(--accent); }
+  .pill-badge.short { background: var(--accent2); }
+  .pill-badge.synced { background: #5b7fa3; }
+
+  .status-badge {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-weight: 500;
+  }
+  .status-badge.synced  { background: var(--accent-light); color: var(--accent); }
+  .status-badge.partial { background: #edf2f7; color: #5b7fa3; }
+  .status-badge.warning { background: var(--accent2-light); color: var(--accent2); }
+
+  .days-diff {
+    font-size: 0.75rem;
+    color: var(--ink-muted);
+    margin-top: 2px;
+  }
+
+  /* SUMMARY BAR */
+  .summary-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+
+  .summary-item {
+    padding: 18px 24px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  .summary-item:last-child { border-right: none; }
+
+  .summary-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .summary-label {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-muted);
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 48px;
+    color: var(--ink-muted);
+    font-size: 0.8rem;
+    border: 1.5px dashed var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+  }
+
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+
+  /* ERROR */
+  .error-msg {
+    background: var(--accent2-light);
+    border: 1.5px solid var(--accent2);
+    color: var(--accent2);
+    border-radius: var(--radius);
+    padding: 12px 18px;
+    font-size: 0.8rem;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  @media (max-width: 700px) {
+    header { padding: 16px 20px; }
+    .rx-card-top { grid-template-columns: 1fr auto; }
+    .rx-card-top .mode-toggle { order: 3; grid-column: 1 / -1; }
+    .rx-card-fields { grid-template-columns: 1fr 1fr; }
+    .sync-card { flex-direction: column; align-items: stretch; }
+    .summary-bar { grid-template-columns: 1fr; }
+    .summary-item { border-right: none; border-bottom: 1px solid var(--border); }
+  }
 </style>
 </head>
 <body>
@@ -242,25 +523,22 @@ tr:hover td { background: var(--accent-light); }
 
 <main>
 
-  <div class="section-label">Settings</div>
+  <!-- SYNC DATE & GRACE PERIOD -->
+  <div class="section-label">Sync Parameters</div>
   <div class="sync-card">
     <div class="field-group">
-      <label>Today's Date</label>
-      <input type="date" id="todayDate">
-      <div class="leeway-note">Reference date for calculations</div>
+      <label>Sync Target Date</label>
+      <input type="date" id="syncDate">
+      <div class="leeway-note">The date you'd like all Rx to align to</div>
     </div>
     <div class="field-group">
       <label>Grace Period (days)</label>
-      <input type="number" id="gracePeriod" value="10" min="1" max="30">
-      <div class="leeway-note">How early a fill can be dispensed</div>
-    </div>
-    <div class="field-group">
-      <label>Standard Days Supply</label>
-      <input type="number" id="stdSupply" value="90" min="1" max="365">
-      <div class="leeway-note">Normal fill amount once synced</div>
+      <input type="number" id="gracePeriod" value="10" min="0" max="30">
+      <div class="leeway-note">Leeway window for early fills</div>
     </div>
   </div>
 
+  <!-- PRESCRIPTIONS -->
   <div class="section-label">Prescriptions</div>
   <div class="rx-list" id="rxList"></div>
   <div class="empty-state" id="emptyState">
@@ -276,381 +554,323 @@ tr:hover td { background: var(--accent-light); }
     <button class="btn btn-clear" onclick="clearAll()">✕ Clear All</button>
   </div>
 
-  <div id="results"></div>
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="section-label">Sync Results</div>
+    <div class="summary-bar">
+      <div class="summary-item">
+        <div class="summary-value" id="sumTotal">0</div>
+        <div class="summary-label">Prescriptions</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value" id="sumSynced">0</div>
+        <div class="summary-label">Already in Window</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-value" id="sumAdjusted">0</div>
+        <div class="summary-label">Days Supply Adjusted</div>
+      </div>
+    </div>
+    <div class="results-table">
+      <div class="results-header">
+        <h2>Recommended Days Supply</h2>
+        <span class="sync-target-date" id="syncTargetLabel"></span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Prescription</th>
+            <th>Runs Out</th>
+            <th>Current Days Supply</th>
+            <th>Days Remaining</th>
+            <th>Recommended Fill</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+    </div>
+  </div>
 
 </main>
 
 <script>
-// ── Helpers ─────────────────────────────────────────────────────────────────
-let rxCounter = 0;
-const rxItems = [];
+  let rxCounter = 0;
+  // Map of id -> input mode: 'date' | 'pills'
+  const rxModes = {};
+  const rxItems = [];
 
-// Populate today's date field with actual today
-const _realToday = new Date(); _realToday.setHours(0,0,0,0);
-document.getElementById('todayDate').value = _realToday.toISOString().split('T')[0];
+  // Set default sync date to today
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  document.getElementById('syncDate').value = today.toISOString().split('T')[0];
 
-function getToday() {
-  const v = document.getElementById('todayDate').value;
-  return v ? pd(v) : _realToday;
-}
+  function addRx() {
+    rxCounter++;
+    const id = rxCounter;
+    rxItems.push(id);
+    rxModes[id] = 'date'; // default mode
+    updateEmptyState();
 
-function pd(str) {
-  if (!str) return null;
-  const [y,m,d] = str.split('-').map(Number);
-  return new Date(y, m-1, d);
-}
-function fd(date) {
-  return date.toLocaleDateString('en-CA', { year:'numeric', month:'short', day:'numeric' });
-}
-function addDays(d, n) {
-  const r = new Date(d); r.setDate(r.getDate() + n); return r;
-}
-function diffDays(a, b) {
-  return Math.round((b - a) / 86400000);
-}
-function showError(msg) {
-  const el = document.getElementById('errorMsg');
-  el.textContent = msg; el.style.display = 'block';
-  setTimeout(() => el.style.display = 'none', 4500);
-}
-
-// ── UI ───────────────────────────────────────────────────────────────────────
-function updateEmptyState() {
-  document.getElementById('emptyState').style.display = rxItems.length === 0 ? 'block' : 'none';
-}
-
-function addRx() {
-  rxCounter++;
-  const id = rxCounter;
-  rxItems.push(id);
-  updateEmptyState();
-
-  const list = document.getElementById('rxList');
-  const card = document.createElement('div');
-  card.className = 'rx-card';
-  card.id = `rx-${id}`;
-  card.innerHTML = `
-    <div class="field-group">
-      <div class="rx-num">Rx #${id}</div>
-      <label>Drug / Prescription Name</label>
-      <input type="text" placeholder="e.g. Metformin 500mg" id="name-${id}">
-    </div>
-    <div class="field-group">
-      <label>Last Fill Date</label>
-      <input type="date" id="date-${id}">
-    </div>
-    <div class="field-group">
-      <label>Days Supply Dispensed</label>
-      <input type="number" id="supply-${id}" min="1" max="365" placeholder="90">
-    </div>
-    <button class="btn-remove" onclick="removeRx(${id})" title="Remove">×</button>
-  `;
-  list.appendChild(card);
-}
-
-function removeRx(id) {
-  const idx = rxItems.indexOf(id);
-  if (idx > -1) rxItems.splice(idx, 1);
-  const card = document.getElementById(`rx-${id}`);
-  if (card) {
-    card.style.opacity = '0'; card.style.transform = 'translateX(12px)';
-    card.style.transition = 'all 0.2s ease';
-    setTimeout(() => card.remove(), 200);
-  }
-  setTimeout(updateEmptyState, 210);
-  document.getElementById('results').style.display = 'none';
-}
-
-function clearAll() {
-  rxItems.length = 0; rxCounter = 0;
-  document.getElementById('rxList').innerHTML = '';
-  document.getElementById('results').innerHTML = '';
-  document.getElementById('results').style.display = 'none';
-  document.getElementById('errorMsg').style.display = 'none';
-  updateEmptyState();
-}
-
-// ── CORE ALGORITHM ───────────────────────────────────────────────────────────
-//
-//  The sync target = the LATEST expiry date among all prescriptions.
-//  (The med that runs out last anchors everything else.)
-//
-//  For every other med:
-//    1. Find when it will next be fillable (expiry - grace).
-//    2. From that fill date, issue a SHORT fill of exactly:
-//       (syncTarget - fillDate) days  →  so it expires on sync target.
-//    3. After sync target, everyone fills the standard supply together.
-//
-//  Edge cases:
-//    • Med is already within grace of sync target → normal fill.
-//    • Short fill would be > std supply → just fill std (med already past sync,
-//      or gap is bigger than one fill; we only show one interim fill here).
-//    • Short fill < 1 day → clamp to 1.
-//
-function calculate() {
-  document.getElementById('errorMsg').style.display = 'none';
-
-  const grace = parseInt(document.getElementById('gracePeriod').value) || 10;
-  const stdDays = parseInt(document.getElementById('stdSupply').value) || 90;
-
-  if (rxItems.length === 0) { showError('Please add at least one prescription.'); return; }
-
-  const today = getToday();
-
-  // 1. Parse meds
-  const meds = [];
-  for (const id of rxItems) {
-    const name    = document.getElementById(`name-${id}`).value.trim() || `Rx #${id}`;
-    const dateStr = document.getElementById(`date-${id}`).value;
-    const supply  = parseInt(document.getElementById(`supply-${id}`).value);
-
-    if (!dateStr) { showError(`"${name}": please enter a Last Fill Date.`); return; }
-    if (!supply || supply < 1) { showError(`"${name}": please enter a valid Days Supply.`); return; }
-
-    const lastFill = pd(dateStr);
-    const expiry   = addDays(lastFill, supply);
-    meds.push({ id, name, lastFill, supply, expiry });
-  }
-
-  // 2. Sync target = latest expiry
-  const syncTarget = meds.reduce((best, m) => m.expiry > best ? m.expiry : best, meds[0].expiry);
-
-  // 3. For each med, figure out the fill plan
-  const plans = meds.map(med => {
-    const daysToExpiry = diffDays(today, med.expiry);
-
-    // When can this med next be filled?
-    // Earliest fill date = expiry - grace  (but not before today)
-    const earliestFill = addDays(med.expiry, -grace);
-    const fillDate = earliestFill < today ? today : earliestFill;
-
-    // How many days from the fill date to sync target?
-    const daysToSync = diffDays(fillDate, syncTarget);
-
-    // Is this med already the anchor (its expiry IS the sync target)?
-    const isAnchor = med.expiry.getTime() === syncTarget.getTime();
-
-    // Is the med already within grace of sync target?
-    const offsetFromSync = diffDays(med.expiry, syncTarget); // positive = expires before sync
-    const alreadySynced = Math.abs(offsetFromSync) <= grace;
-
-    let fillType, shortDays, fillDateUsed;
-
-    if (isAnchor || alreadySynced) {
-      // No short fill needed — just fill normal at next due date
-      fillType = isAnchor ? 'anchor' : 'synced';
-      shortDays = stdDays;
-      fillDateUsed = fillDate;
-    } else if (daysToSync <= 0) {
-      // Sync date has already passed (or fill date is after sync) — fill normal
-      fillType = 'normal';
-      shortDays = stdDays;
-      fillDateUsed = fillDate;
-    } else {
-      // Needs a short fill: fill exactly enough to expire on sync target
-      shortDays = Math.max(1, daysToSync);
-      fillType = 'short';
-      fillDateUsed = fillDate;
-    }
-
-    const newExpiry = addDays(fillDateUsed, shortDays);
-
-    return { ...med, fillDate: fillDateUsed, fillDays: shortDays, fillType, newExpiry, offsetFromSync, daysToExpiry, syncTarget };
-  });
-
-  renderResults(plans, grace, stdDays, syncTarget);
-}
-
-// ── RENDER ───────────────────────────────────────────────────────────────────
-function renderResults(plans, grace, stdDays, syncTarget) {
-  const out = document.getElementById('results');
-  out.innerHTML = '';
-  out.style.display = 'block';
-
-  // Summary counts
-  const nShort   = plans.filter(p => p.fillType === 'short').length;
-  const nSynced  = plans.filter(p => p.fillType === 'anchor' || p.fillType === 'synced').length;
-
-  // ── Summary bar
-  const sumBar = document.createElement('div');
-  sumBar.className = 'summary-bar';
-  sumBar.innerHTML = `
-    <div class="summary-item">
-      <div class="summary-value">${plans.length}</div>
-      <div class="summary-label">Prescriptions</div>
-    </div>
-    <div class="summary-item">
-      <div class="summary-value">${nShort}</div>
-      <div class="summary-label">Short Fills Needed</div>
-    </div>
-    <div class="summary-item">
-      <div class="summary-value">${nSynced}</div>
-      <div class="summary-label">Already at Anchor</div>
-    </div>
-  `;
-  out.appendChild(sumBar);
-
-  // ── Sync banner
-  const banner = document.createElement('div');
-  banner.className = 'sync-banner';
-  banner.innerHTML = `
-    <div>
-      <h2>Sync Target Date</h2>
-      <div class="sync-banner-sub">All prescriptions will align for 90-day fills from this date</div>
-    </div>
-    <div style="text-align:right">
-      <div class="sync-banner-date">${fd(syncTarget)}</div>
-      <div class="sync-banner-sub">${grace}-day grace window applies</div>
-    </div>
-  `;
-  out.appendChild(banner);
-
-  // ── Main table
-  const block = document.createElement('div');
-  block.className = 'section-block';
-
-  const blockHead = document.createElement('div');
-  blockHead.className = 'section-block-header';
-  blockHead.innerHTML = `<h3>Fill Plan — Interim Fills to Sync</h3><span class="event-date-label">One fill per Rx until sync date</span>`;
-  block.appendChild(blockHead);
-
-  const table = document.createElement('table');
-  table.innerHTML = `
-    <thead><tr>
-      <th>#</th>
-      <th>Prescription</th>
-      <th>Current Expiry</th>
-      <th>Recommended Fill Date</th>
-      <th>Days Supply</th>
-      <th>New Expiry After Fill</th>
-      <th>Type</th>
-    </tr></thead>
-  `;
-
-  const tbody = document.createElement('tbody');
-  plans.forEach((p, i) => {
-    const diff = p.fillDays - stdDays;
-    const diffLabel = diff === 0 ? 'Standard fill' : (diff > 0 ? `+${diff}d vs std` : `${diff}d vs std (short)`);
-
-    // Recommended fill date = earliest day the fill can be dispensed
-    // = expiry - grace, but not before today
-    const today = getToday();
-    const windowOpen = addDays(p.expiry, -grace);
-    const recFillDate = windowOpen < today ? today : windowOpen;
-
-    let badgeClass, typeClass, typeLabel;
-    if (p.fillType === 'short') {
-      badgeClass = 'pill-amber'; typeClass = 'type-short'; typeLabel = 'Short Fill';
-    } else if (p.fillType === 'anchor') {
-      badgeClass = 'pill-green'; typeClass = 'type-sync'; typeLabel = 'Anchor';
-    } else if (p.fillType === 'synced') {
-      badgeClass = 'pill-green'; typeClass = 'type-sync'; typeLabel = 'Already Synced';
-    } else {
-      badgeClass = 'pill-blue'; typeClass = 'type-normal'; typeLabel = 'Normal Fill';
-    }
-
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td style="color:var(--ink-muted);font-size:0.75rem">${i+1}</td>
-      <td style="font-weight:500">${p.name}</td>
-      <td>${fd(p.expiry)}</td>
-      <td style="font-weight:500">${fd(recFillDate)}</td>
-      <td>
-        <span class="pill-badge ${badgeClass}">${p.fillDays}d</span>
-        <div style="font-size:0.7rem;color:var(--ink-muted);margin-top:3px">${diffLabel}</div>
-      </td>
-      <td style="font-weight:500">${fd(p.newExpiry)}</td>
-      <td><span class="type-badge ${typeClass}">${typeLabel}</span></td>
-    `;
-    tbody.appendChild(tr);
-  });
-
-  table.appendChild(tbody);
-  block.appendChild(table);
-  out.appendChild(block);
-
-  // ── After-sync note
-  const note = document.createElement('div');
-  note.style.cssText = 'background:var(--accent-light);border:1.5px solid var(--accent);border-radius:var(--radius);padding:16px 20px;font-size:0.82rem;color:var(--accent);margin-bottom:24px;';
-  note.innerHTML = `<strong>After ${fd(syncTarget)}:</strong> Fill all ${plans.length} prescriptions for <strong>${stdDays} days</strong> together on the same pickup — every cycle from this point forward.`;
-  out.appendChild(note);
-
-  // ── Timeline
-  renderTimeline(out, plans, grace, syncTarget);
-
-  out.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function renderTimeline(out, plans, grace, syncTarget) {
-  const block = document.createElement('div');
-  block.className = 'section-block';
-
-  const blockHead = document.createElement('div');
-  blockHead.className = 'section-block-header';
-  blockHead.innerHTML = `<h3>Visual Timeline</h3><span class="event-date-label">Green bar = sync date</span>`;
-  block.appendChild(blockHead);
-
-  const wrap = document.createElement('div');
-  wrap.className = 'timeline-wrap';
-
-  // Date range: min of (all last fills, today) → sync target + 10
-  const today = getToday();
-  const allDates = plans.flatMap(p => [p.lastFill, p.expiry, p.fillDate, p.newExpiry]);
-  const minD = allDates.reduce((a,b) => a < b ? a : b);
-  const maxD = addDays(syncTarget, 15);
-  const totalSpan = diffDays(minD, maxD);
-
-  function pct(d) { return Math.max(0, Math.min(100, diffDays(minD, d) / totalSpan * 100)); }
-
-  let html = `<div class="tl-title">Timeline · ${plans.length} prescriptions</div>`;
-
-  plans.forEach(p => {
-    // Segment 1: existing fill (lastFill → expiry)  [shown as past/current]
-    // Segment 2: short/bridge fill (fillDate → newExpiry) [amber if short, green if anchor]
-    const s1L = pct(p.lastFill).toFixed(2);
-    const s1W = Math.max(0.5, (pct(p.expiry) - pct(p.lastFill))).toFixed(2);
-    const s2L = pct(p.fillDate).toFixed(2);
-    const s2W = Math.max(0.5, (pct(p.newExpiry) - pct(p.fillDate))).toFixed(2);
-
-    const seg2Class = (p.fillType === 'anchor' || p.fillType === 'synced') ? 'seg-sync' : (p.fillType === 'short' ? 'seg-short' : 'seg-sync');
-
-    const todayPct = pct(today).toFixed(2);
-    const syncPct  = pct(syncTarget).toFixed(2);
-
-    html += `<div class="tl-row">
-      <div class="tl-label" title="${p.name}">${p.name}</div>
-      <div class="tl-track">
-        <div class="tl-seg seg-past" style="left:${s1L}%;width:${s1W}%">${p.supply}d</div>
-        <div class="tl-seg ${seg2Class}" style="left:${s2L}%;width:${s2W}%">${p.fillDays}d</div>
-        <div class="tl-vline today" style="left:${todayPct}%"></div>
-        <div class="tl-vline sync"  style="left:${syncPct}%"></div>
+    const list = document.getElementById('rxList');
+    const card = document.createElement('div');
+    card.className = 'rx-card';
+    card.id = `rx-${id}`;
+    card.innerHTML = `
+      <div class="rx-card-top">
+        <div class="field-group">
+          <div class="rx-num">Rx #${id}</div>
+          <label>Drug / Prescription Name</label>
+          <input type="text" placeholder="e.g. Metformin 500mg" id="name-${id}" style="width:100%">
+        </div>
+        <div class="mode-toggle" id="toggle-${id}">
+          <button class="active" onclick="setMode(${id}, 'date')" id="btn-date-${id}" title="Enter last fill date">📅 Last Fill Date</button>
+          <button onclick="setMode(${id}, 'pills')" id="btn-pills-${id}" title="Enter pills remaining">💊 Pills Remaining</button>
+        </div>
+        <button class="btn-remove" onclick="removeRx(${id})" title="Remove">×</button>
       </div>
-    </div>`;
-  });
+      <div class="rx-card-fields">
+        <div class="input-slot" id="slot-${id}">
+          ${renderSlot(id, 'date')}
+        </div>
+        <div class="field-group">
+          <label>Days Supply Dispensed</label>
+          <input type="number" id="supply-${id}" min="1" max="365" placeholder="90">
+        </div>
+        <div class="field-group">
+          <label>Std Days Supply</label>
+          <input type="number" id="std-${id}" min="1" max="365" placeholder="90">
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  }
 
-  // Axis
-  const todayPct = pct(today).toFixed(2);
-  const syncPct  = pct(syncTarget).toFixed(2);
-  html += `<div class="tl-axis" style="margin-left:calc(130px + 12px)">
-    <div class="tl-tick today" style="left:${todayPct}%">Today</div>
-    <div class="tl-tick sync"  style="left:${syncPct}%">${fd(syncTarget)}</div>
-  </div>`;
+  function renderSlot(id, mode) {
+    if (mode === 'date') {
+      return `
+        <div class="input-slot-inner">
+          <label style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-muted)">Last Service Date</label>
+          <input type="date" id="date-${id}">
+          <div class="mode-hint">Calculates days remaining from fill date</div>
+        </div>`;
+    } else {
+      return `
+        <div class="input-slot-inner">
+          <label style="font-size:0.65rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--ink-muted)">Pills Remaining</label>
+          <input type="number" id="pills-${id}" min="0" max="9999" placeholder="e.g. 45" style="width:120px">
+          <div class="mode-hint">Assumes 1 pill per day — adjust supply if different</div>
+        </div>`;
+    }
+  }
 
-  // Legend
-  html += `<div class="tl-legend">
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--surface2);border:1px solid var(--border)"></div>Current fill</div>
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:#b07a1a"></div>Short (bridge) fill</div>
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent)"></div>Anchor / sync fill</div>
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent2);height:4px;margin-top:5px;border-radius:2px"></div>Today</div>
-    <div class="tl-leg-item"><div class="tl-leg-swatch" style="background:var(--accent);height:4px;margin-top:5px;border-radius:2px"></div>Sync target</div>
-  </div>`;
+  function setMode(id, mode) {
+    rxModes[id] = mode;
+    // Update toggle buttons
+    document.getElementById(`btn-date-${id}`).classList.toggle('active', mode === 'date');
+    document.getElementById(`btn-pills-${id}`).classList.toggle('active', mode === 'pills');
+    // Swap slot content
+    document.getElementById(`slot-${id}`).innerHTML = renderSlot(id, mode);
+    // Hide results when inputs change
+    document.getElementById('results').style.display = 'none';
+  }
 
-  wrap.innerHTML = html;
-  block.appendChild(wrap);
-  out.appendChild(block);
-}
+  function removeRx(id) {
+    const idx = rxItems.indexOf(id);
+    if (idx > -1) rxItems.splice(idx, 1);
+    delete rxModes[id];
+    const card = document.getElementById(`rx-${id}`);
+    if (card) {
+      card.style.opacity = '0';
+      card.style.transform = 'translateX(12px)';
+      card.style.transition = 'all 0.2s ease';
+      setTimeout(() => card.remove(), 200);
+    }
+    setTimeout(updateEmptyState, 210);
+    document.getElementById('results').style.display = 'none';
+  }
 
-updateEmptyState();
+  function updateEmptyState() {
+    document.getElementById('emptyState').style.display = rxItems.length === 0 ? 'block' : 'none';
+  }
+
+  function clearAll() {
+    rxItems.length = 0;
+    rxCounter = 0;
+    Object.keys(rxModes).forEach(k => delete rxModes[k]);
+    document.getElementById('rxList').innerHTML = '';
+    document.getElementById('results').style.display = 'none';
+    document.getElementById('errorMsg').style.display = 'none';
+    updateEmptyState();
+  }
+
+  function parseDate(str) {
+    if (!str) return null;
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  function formatDate(date) {
+    return date.toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function addDays(date, days) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + days);
+    return d;
+  }
+
+  function diffDays(a, b) {
+    return Math.round((b - a) / (1000 * 60 * 60 * 24));
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 4000);
+  }
+
+  function calculate() {
+    document.getElementById('errorMsg').style.display = 'none';
+
+    const syncDateStr = document.getElementById('syncDate').value;
+    const grace = parseInt(document.getElementById('gracePeriod').value) || 10;
+
+    if (!syncDateStr) { showError('Please set a Sync Target Date.'); return; }
+    if (rxItems.length === 0) { showError('Please add at least one prescription.'); return; }
+
+    const syncDate = parseDate(syncDateStr);
+    const rows = [];
+    let valid = true;
+
+    for (const id of rxItems) {
+      const name = document.getElementById(`name-${id}`).value.trim() || `Rx #${id}`;
+      const supply = parseInt(document.getElementById(`supply-${id}`).value);
+      const stdSupply = parseInt(document.getElementById(`std-${id}`).value) || supply;
+      const mode = rxModes[id] || 'date';
+
+      if (!supply || supply < 1) { showError(`"${name}": please enter a valid Days Supply Dispensed.`); valid = false; break; }
+
+      let runsOut;
+      let daysRemainingDisplay;
+      let lastFilledDisplay = null;
+
+      if (mode === 'date') {
+        // --- DATE MODE ---
+        const dateStr = document.getElementById(`date-${id}`).value;
+        if (!dateStr) { showError(`"${name}": please enter a Last Service Date.`); valid = false; break; }
+        const lastFilled = parseDate(dateStr);
+        lastFilledDisplay = formatDate(lastFilled);
+        runsOut = addDays(lastFilled, supply);
+        daysRemainingDisplay = diffDays(today, runsOut);
+      } else {
+        // --- PILLS MODE ---
+        const pillsEl = document.getElementById(`pills-${id}`);
+        const pills = parseInt(pillsEl ? pillsEl.value : '');
+        if (isNaN(pills) || pills < 0) { showError(`"${name}": please enter a valid Pills Remaining count.`); valid = false; break; }
+        // Treat pills remaining as days remaining (1 pill = 1 day, caller adjusts supply if needed)
+        daysRemainingDisplay = pills;
+        runsOut = addDays(today, pills);
+        lastFilledDisplay = `${pills} pills remaining`;
+      }
+
+      // Days until sync date from today
+      const daysToSync = diffDays(today, syncDate);
+
+      // How many days off is runout vs sync date
+      const daysOffSync = diffDays(runsOut, syncDate); // positive = runs out before sync, negative = after
+
+      // Days from today to sync date = what short fill needs to cover from today
+      // For short fill: we want next fill date ~ sync date
+      // recommendedFill (days supply) = days from today to sync date (so it runs out near sync date)
+      const daysFromTodayToSync = diffDays(today, syncDate);
+
+      let recommendedFill;
+      let status;
+      let statusClass;
+
+      if (Math.abs(daysOffSync) <= grace) {
+        recommendedFill = stdSupply;
+        status = `Within ${grace}-day window`;
+        statusClass = 'synced';
+      } else if (daysOffSync > grace) {
+        // Runs out BEFORE sync — short fill to bridge to sync date
+        recommendedFill = Math.max(1, daysFromTodayToSync + daysRemainingDisplay);
+        // More precisely: short fill = days remaining + days from runout to sync
+        // i.e. extend current supply by daysOffSync
+        recommendedFill = Math.max(1, supply + daysOffSync);
+        // But if mode is pills, supply refers to the dispensed amount; recalc from pills remaining
+        if (mode === 'pills') {
+          // We want to dispense enough that runout ≈ syncDate
+          // runout = today + daysRemainingDisplay + newFill
+          // newFill = syncDate - today - daysRemainingDisplay
+          recommendedFill = Math.max(1, daysFromTodayToSync - daysRemainingDisplay);
+        }
+        status = `Short fill to sync`;
+        statusClass = 'partial';
+      } else {
+        // Runs out AFTER sync — already past
+        recommendedFill = stdSupply;
+        status = `Past sync date`;
+        statusClass = 'warning';
+      }
+
+      rows.push({ id, name, lastFilledDisplay, runsOut, supply, stdSupply, recommendedFill, status, statusClass, daysOffSync, daysRemainingDisplay, mode });
+    }
+
+    if (!valid) return;
+
+    // Render results
+    const tbody = document.getElementById('resultsBody');
+    tbody.innerHTML = '';
+
+    let synced = 0;
+    let adjusted = 0;
+
+    rows.forEach((r, i) => {
+      const diff = r.recommendedFill - r.stdSupply;
+      const diffLabel = diff === 0 ? '' : (diff > 0 ? `+${diff} days` : `${diff} days`);
+
+      if (r.statusClass === 'synced') synced++;
+      if (r.recommendedFill !== r.stdSupply) adjusted++;
+
+      const daysRemLabel = r.daysRemainingDisplay >= 0
+        ? `${r.daysRemainingDisplay} days`
+        : `<span style="color:var(--accent2)">${r.daysRemainingDisplay} days (overdue)</span>`;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="color:var(--ink-muted);font-size:0.75rem">${i + 1}</td>
+        <td class="rx-name-cell">
+          ${r.name}
+          <div style="font-size:0.65rem;color:var(--ink-muted);margin-top:2px">${r.mode === 'pills' ? '💊 pills input' : '📅 date input'}</div>
+        </td>
+        <td>${formatDate(r.runsOut)}</td>
+        <td>${r.supply} days</td>
+        <td>${daysRemLabel}</td>
+        <td>
+          <span class="pill-badge ${r.statusClass}">${r.recommendedFill}d</span>
+          ${diffLabel ? `<div class="days-diff">${diffLabel} vs standard</div>` : '<div class="days-diff">Standard fill</div>'}
+        </td>
+        <td><span class="status-badge ${r.statusClass}">${r.status}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('sumTotal').textContent = rows.length;
+    document.getElementById('sumSynced').textContent = synced;
+    document.getElementById('sumAdjusted').textContent = adjusted;
+    document.getElementById('syncTargetLabel').textContent = `Target: ${formatDate(syncDate)} ± ${grace} days`;
+
+    const resultsEl = document.getElementById('results');
+    resultsEl.style.display = 'block';
+    resultsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  // Init
+  updateEmptyState();
 </script>
 </body>
 </html>
