@@ -334,17 +334,17 @@ function calculate() {
   const plans = meds.map(med => {
     // The earliest this med can be refilled. If "Never fill early" is checked,
     // ignore the grace period and only allow filling on/after the exact expiry.
-    // Otherwise apply the normal grace window (expiry − grace days).
+    // Otherwise apply the normal buffer window (expiry − grace days).
     // Either way, we can't fill in the past, so floor at today.
     const earliestFill   = med.neverEarly ? med.expiry : addDays(med.expiry, -grace);
     const fillDate       = earliestFill < today ? today : earliestFill;
 
-    // How many days between this med's fill date and syncExpiry.
-    // Bridge fills target syncTarget as their new expiry. This means:
-    //   - bridge fill expires on syncTarget (e.g. May 20)  → last day of its fill window
-    //   - anchor becomes fillable on syncTarget             → first day of its fill window
-    // Both windows overlap exactly on syncTarget, so everyone fills together that day.
-    const daysToSync     = diffDays(fillDate, syncTarget);
+    // How many days between this med's current expiry and the sync target.
+    // Using expiry (not fillDate) means the dispensed quantity is the true bridge
+    // from when the current supply runs out to the sync date — the early pickup
+    // window doesn't inflate the quantity. newExpiry for bridge fills is set from
+    // expiry + daysToSync = syncTarget, so all meds still align on the sync date.
+    const daysToSync     = diffDays(med.expiry, syncTarget);
 
     // The anchor is the med whose expiry defines syncExpiry.
     // If two meds share the same max expiry, both will be isAnchor.
@@ -377,7 +377,12 @@ function calculate() {
       fillDateUsed = fillDate;
     }
 
-    const newExpiry = addDays(fillDateUsed, shortDays);
+    // Bridge fills: newExpiry counts from the current expiry so the dispensed
+    // quantity truly bridges expiry → syncTarget regardless of early pickup.
+    // Anchor / normal / fixed fills still count from the actual fill date.
+    const newExpiry = (fillType === 'short')
+      ? addDays(med.expiry, shortDays)
+      : addDays(fillDateUsed, shortDays);
     // neverEarly is spread from ...med but listed explicitly for clarity
     return { ...med, fillDate: fillDateUsed, fillDays: shortDays, fillType, newExpiry, offsetFromSync, syncExpiry };
   });
@@ -447,7 +452,7 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
     </div>
     <div style="text-align:right">
       <div class="sync-banner-date">${fd(syncTarget)}</div>
-      <div class="sync-banner-sub">${grace}-day grace window applies</div>
+      <div class="sync-banner-sub">${grace}-day buffer period applies</div>
     </div>
   `;
   out.appendChild(banner);
