@@ -245,6 +245,11 @@ tr:hover td { background: var(--accent-light); }
   <div class="section-label">Settings</div>
   <div class="sync-card">
     <div class="field-group">
+      <label>Today's Date</label>
+      <input type="date" id="todayDate">
+      <div class="leeway-note">Reference date for calculations</div>
+    </div>
+    <div class="field-group">
       <label>Grace Period (days)</label>
       <input type="number" id="gracePeriod" value="10" min="1" max="30">
       <div class="leeway-note">How early a fill can be dispensed</div>
@@ -279,7 +284,15 @@ tr:hover td { background: var(--accent-light); }
 // ── Helpers ─────────────────────────────────────────────────────────────────
 let rxCounter = 0;
 const rxItems = [];
-const today = new Date(); today.setHours(0,0,0,0);
+
+// Populate today's date field with actual today
+const _realToday = new Date(); _realToday.setHours(0,0,0,0);
+document.getElementById('todayDate').value = _realToday.toISOString().split('T')[0];
+
+function getToday() {
+  const v = document.getElementById('todayDate').value;
+  return v ? pd(v) : _realToday;
+}
 
 function pd(str) {
   if (!str) return null;
@@ -381,6 +394,8 @@ function calculate() {
   const stdDays = parseInt(document.getElementById('stdSupply').value) || 90;
 
   if (rxItems.length === 0) { showError('Please add at least one prescription.'); return; }
+
+  const today = getToday();
 
   // 1. Parse meds
   const meds = [];
@@ -505,8 +520,8 @@ function renderResults(plans, grace, stdDays, syncTarget) {
       <th>#</th>
       <th>Prescription</th>
       <th>Current Expiry</th>
-      <th>Next Fill Window Opens</th>
-      <th>Recommended Fill</th>
+      <th>Recommended Fill Date</th>
+      <th>Days Supply</th>
       <th>New Expiry After Fill</th>
       <th>Type</th>
     </tr></thead>
@@ -514,9 +529,14 @@ function renderResults(plans, grace, stdDays, syncTarget) {
 
   const tbody = document.createElement('tbody');
   plans.forEach((p, i) => {
-    const fillWindowStr = fd(addDays(p.expiry, -grace)) + ' – ' + fd(p.expiry);
     const diff = p.fillDays - stdDays;
     const diffLabel = diff === 0 ? 'Standard fill' : (diff > 0 ? `+${diff}d vs std` : `${diff}d vs std (short)`);
+
+    // Recommended fill date = earliest day the fill can be dispensed
+    // = expiry - grace, but not before today
+    const today = getToday();
+    const windowOpen = addDays(p.expiry, -grace);
+    const recFillDate = windowOpen < today ? today : windowOpen;
 
     let badgeClass, typeClass, typeLabel;
     if (p.fillType === 'short') {
@@ -534,7 +554,7 @@ function renderResults(plans, grace, stdDays, syncTarget) {
       <td style="color:var(--ink-muted);font-size:0.75rem">${i+1}</td>
       <td style="font-weight:500">${p.name}</td>
       <td>${fd(p.expiry)}</td>
-      <td style="font-size:0.78rem">${fillWindowStr}</td>
+      <td style="font-weight:500">${fd(recFillDate)}</td>
       <td>
         <span class="pill-badge ${badgeClass}">${p.fillDays}d</span>
         <div style="font-size:0.7rem;color:var(--ink-muted);margin-top:3px">${diffLabel}</div>
@@ -574,6 +594,7 @@ function renderTimeline(out, plans, grace, syncTarget) {
   wrap.className = 'timeline-wrap';
 
   // Date range: min of (all last fills, today) → sync target + 10
+  const today = getToday();
   const allDates = plans.flatMap(p => [p.lastFill, p.expiry, p.fillDate, p.newExpiry]);
   const minD = allDates.reduce((a,b) => a < b ? a : b);
   const maxD = addDays(syncTarget, 15);
