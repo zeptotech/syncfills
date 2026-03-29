@@ -517,13 +517,6 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   `;
   out.appendChild(banner);
 
-  // ── Intro note ────────────────────────────────────────────────────────
-  const intro = document.createElement('div');
-  intro.className = 'fill-plan-intro';
-  intro.style.cssText = 'font-size:0.82rem;color:var(--ink-muted);margin-bottom:20px;line-height:1.6;';
-  intro.textContent = `Follow the dates below to gradually align your prescriptions to a single pickup day. Once you reach the sync date, all ${plans.length} prescription${plans.length > 1 ? 's' : ''} will be filled together every ${stdDays} days.`;
-  out.appendChild(intro);
-
   // ── Fill plan table ────────────────────────────────────────────────────
   // One row per prescription showing what to do before the sync date.
   const block = document.createElement('div');
@@ -573,9 +566,9 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   const afterNote = document.createElement('div');
   afterNote.style.cssText = 'background:var(--accent-light);border:1.5px solid var(--accent);border-radius:var(--radius);padding:16px 20px;font-size:0.82rem;color:var(--accent);margin-bottom:24px;';
   afterNote.innerHTML = `<strong>After ${fd(syncTarget)}:</strong> We will fill all ${plans.length} prescriptions for <strong>${stdDays} days</strong> together on the same pickup — every cycle from this point forward.${grace > 0 ? `<br>Your prescriptions may be filled up to <strong>${grace} day${grace !== 1 ? 's' : ''} early</strong> each cycle leading up to your sync date.` : ''}`;
-  out.appendChild(afterNote);
-
   renderTimeline(out, plans, grace, syncTarget, syncExpiry, today);
+
+  out.appendChild(afterNote);
   renderSchedule(out, plans, grace, stdDays, syncTarget, today);
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
