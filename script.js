@@ -509,7 +509,6 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   banner.innerHTML = `
     <div>
       <h2>Sync Target Date</h2>
-      <div class="sync-banner-sub">Bring all prescriptions to the pharmacy on this date</div>
     </div>
     <div style="text-align:right">
       <div class="sync-banner-date">${fd(syncTarget)}</div>
@@ -573,7 +572,7 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   // Reminds the user what to do every cycle once they're in sync.
   const afterNote = document.createElement('div');
   afterNote.style.cssText = 'background:var(--accent-light);border:1.5px solid var(--accent);border-radius:var(--radius);padding:16px 20px;font-size:0.82rem;color:var(--accent);margin-bottom:24px;';
-  afterNote.innerHTML = `<strong>After ${fd(syncTarget)}:</strong> Fill all ${plans.length} prescriptions for <strong>${stdDays} days</strong> together on the same pickup — every cycle from this point forward.`;
+  afterNote.innerHTML = `<strong>After ${fd(syncTarget)}:</strong> We will fill all ${plans.length} prescriptions for <strong>${stdDays} days</strong> together on the same pickup — every cycle from this point forward.`;
   out.appendChild(afterNote);
 
   renderTimeline(out, plans, grace, syncTarget, syncExpiry, today);
