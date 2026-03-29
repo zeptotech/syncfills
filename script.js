@@ -234,21 +234,10 @@ function clearAll() {
 //  backwards to estimate when the bottle was dispensed:
 //
 //    lastFill = today − (daysSupply − daysRemaining)
+//    daysRemaining = round(pillsRemaining / tabletsPerDay)
 //
-//  The tricky part is converting pills → days. We only know the days supply
-//  (how long the bottle is meant to last), not the pill count per fill. The
-//  simplest assumption — and what pharmacists use — is 1 pill = 1 day.
-//  For multi-dose meds (e.g. 2 tablets/day) this underestimates days remaining,
-//  which is why we show an "est." badge and suggest using Last Fill Date instead.
-//
-//  NOTE: deriveFillDate() below was written to support a future "doses/day"
-//  input field, but that field hasn't been added yet. calculate() currently
-//  uses Math.round(pills) directly, hardcoded to 1 dose/day.
-//
-function deriveFillDate(today, pillsRemaining, dosesPerDay, supply) {
-  const daysRemaining = pillsRemaining / dosesPerDay;
-  return addDays(today, -(supply - daysRemaining));
-}
+//  The "est." badge is shown on results derived this way, since the estimate
+//  may be slightly off depending on fill timing.
 
 // ── CALCULATE ─────────────────────────────────────────────────────────────
 // Main entry point triggered by the Calculate button. Reads all card inputs,
@@ -297,7 +286,7 @@ function calculate() {
       hasError = true; break;
     }
 
-    if (!supply || supply < 1) {
+    if (isNaN(supply) || supply < 1) {
       showError(`"${name}": please enter a valid Days Supply.`);
       hasError = true; break;
     }
@@ -310,7 +299,6 @@ function calculate() {
       lastFill = pd(dateStr);
     } else {
       // Estimation path: work backwards from pills on hand
-      // daysRemaining ≈ pills (assumes 1 pill/day; see deriveFillDate for multi-dose)
       const pills = parseFloat(pillsVal);
       if (isNaN(pills) || pills < 0) {
         showError(`"${name}": Pills Remaining must be 0 or more.`); hasError = true; break;
@@ -403,7 +391,6 @@ function calculate() {
     const newExpiry = (fillType === 'short')
       ? addDays(med.expiry, shortDays)
       : addDays(fillDateUsed, shortDays);
-    // neverEarly is spread from ...med but listed explicitly for clarity
     return { ...med, fillDate: fillDateUsed, fillDays: shortDays, fillType, newExpiry, offsetFromSync, syncExpiry };
   });
 
@@ -411,9 +398,9 @@ function calculate() {
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────
-// renderResults builds the full output section: summary bar, optional
-// pills-estimation notice, sync banner, fill plan table, after-sync note,
-// and the visual timeline. Everything is generated fresh on each Calculate.
+// renderResults builds the full output section: summary bar, sync banner,
+// fill plan table, after-sync note, and the visual timeline.
+// Everything is generated fresh on each Calculate.
 function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   const out = document.getElementById('results');
   out.innerHTML = '';
@@ -427,10 +414,9 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
 
   document.getElementById('printBtn').style.display = '';
 
-  // Quick counts used in the summary bar and conditional notice
+  // Quick counts used in the summary bar
   const nShort   = plans.filter(p => p.fillType === 'short').length;
-  const nSynced  = plans.filter(p => p.fillType === 'anchor' || p.fillType === 'synced').length;
-  const nDerived = plans.filter(p => p.derived).length;
+  const nSynced  = plans.filter(p => p.fillType === 'anchor').length;
 
   // ── Summary bar: at-a-glance numbers ──────────────────────────────────
   const sumBar = document.createElement('div');
@@ -450,16 +436,6 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
     </div>
   `;
   out.appendChild(sumBar);
-
-  // ── Pills-estimation notice ────────────────────────────────────────────
-  // Only shown when at least one Rx used the pills-remaining path, since
-  // the estimated last fill date may be off for multi-dose medications.
-  if (nDerived > 0) {
-    const note = document.createElement('div');
-    note.style.cssText = 'background:var(--blue-light);border:1.5px solid rgba(42,77,122,0.25);border-radius:var(--radius);padding:12px 18px;font-size:0.78rem;color:var(--blue);margin-bottom:16px;';
-    note.innerHTML = `<strong>ℹ ${nDerived} prescription${nDerived > 1 ? 's' : ''}</strong> used Pills Remaining — last fill date was estimated assuming 1 tablet per day. If a different dose schedule applies, use the Last Fill Date field instead for precision.`;
-    out.appendChild(note);
-  }
 
   // ── Sync banner: the headline output ──────────────────────────────────
   // syncTarget is the pickup date (syncExpiry − grace), not the expiry itself.
@@ -511,9 +487,6 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
       : diff > 0 ? `+${diff}d vs std`
       : `${diff}d vs std (short)`;
 
-    // Use p.fillDate directly — it's already computed in calculate() as
-    // max(expiry − grace, today), so it's guaranteed to match p.fillDays.
-
     // Badge and label styles vary by fill type
     let badgeClass, typeClass, typeLabel;
     if (p.fillType === 'fixed') {
@@ -522,10 +495,6 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
       badgeClass = 'pill-amber'; typeClass = 'type-short'; typeLabel = 'Short Fill';
     } else if (p.fillType === 'anchor') {
       badgeClass = 'pill-green'; typeClass = 'type-sync'; typeLabel = 'Anchor';
-    } else if (p.fillType === 'synced') {
-      // 'synced' is kept here for display even though the algorithm no longer
-      // produces it — future-proofing in case it's re-introduced.
-      badgeClass = 'pill-green'; typeClass = 'type-sync'; typeLabel = 'Already Synced';
     } else {
       badgeClass = 'pill-blue'; typeClass = 'type-normal'; typeLabel = 'Normal Fill';
     }
