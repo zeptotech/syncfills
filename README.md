@@ -26,3 +26,5 @@ Given a set of prescriptions with different fill dates and days supplies, RxSync
 ## Running locally
 
 - Available via GitHub Pages.
+
+Note: This tool is tailored for viewing on a desktop browser, with print view included. Its layout is not responsive on mobile.
