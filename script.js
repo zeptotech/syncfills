@@ -151,7 +151,7 @@ function addRx() {
 
     <div class="rx-field-date field-group">
       <label>Last Fill Date</label>
-      <input type="date" id="date-${id}" min="2000-01-01" max="2999-12-31">
+      <input type="date" id="date-${id}" min="2000-01-01" max="${_realToday.toISOString().split('T')[0]}">
     </div>
 
     <div class="or-divider">
@@ -382,6 +382,9 @@ function calculate() {
     if (hasDate) {
       // Direct path: user gave us the exact last fill date
       lastFill = pd(dateStr);
+      if (lastFill > today) {
+        showError(`"${name}": Last Fill Date cannot be in the future.`); hasError = true; break;
+      }
     } else {
       // Estimation path: work backwards from pills on hand
       const pills = parseFloat(pillsVal);
