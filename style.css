@@ -423,13 +423,8 @@ tr:hover td { background: var(--accent-light); }
     print-color-adjust: exact;
   }
 
-  /* Timeline: always starts on a new page, no internal breaks, clips overflow */
-  .timeline-block {
-    page-break-before: always;
-    page-break-inside: avoid;
-  }
-  .timeline-wrap { overflow: hidden; }
-  .tl-track { overflow: hidden; }
+  /* Hide visual timeline — not needed on printed handouts */
+  .timeline-block { display: none !important; }
 
   /* ── Timeline: B&W hatch patterns for laser printing ── */
 
