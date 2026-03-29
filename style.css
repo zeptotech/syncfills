@@ -192,6 +192,36 @@ input[type="number"] { width: 90px; }
 .btn-calculate:hover { background: #1e3f2b; border-color: #1e3f2b; }
 .btn-clear { background: none; border: 1.5px solid var(--border); color: var(--ink-muted); }
 .btn-clear:hover { background: var(--accent2-light); border-color: var(--accent2); color: var(--accent2); }
+.btn-export, .btn-import { background: none; border: 1.5px solid var(--border); color: var(--ink-muted); }
+.btn-export:hover, .btn-import:hover { background: var(--blue-light); border-color: var(--blue); color: var(--blue); }
+
+/* IMPORT MODAL */
+.import-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  display: flex; align-items: center; justify-content: center; z-index: 100;
+}
+.import-modal-box {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 28px 32px;
+  width: min(480px, 90vw); display: flex; flex-direction: column; gap: 12px;
+  box-shadow: var(--shadow-lg);
+}
+.import-modal-box h3 { margin: 0; font-size: 1rem; }
+.import-modal-box p  { margin: 0; font-size: 0.8rem; color: var(--ink-muted); }
+.import-modal-box textarea {
+  width: 100%; height: 100px; resize: vertical;
+  font-family: monospace; font-size: 0.75rem;
+  padding: 8px 10px; border: 1.5px solid var(--border);
+  border-radius: var(--radius); background: var(--surface2);
+  color: var(--ink); outline: none; box-sizing: border-box;
+}
+.import-modal-box textarea:focus { border-color: var(--accent); }
+.import-error {
+  font-size: 0.75rem; color: var(--accent2);
+  background: var(--accent2-light); border: 1px solid rgba(200,68,10,0.2);
+  border-radius: var(--radius); padding: 6px 10px;
+}
+.import-modal-actions { display: flex; gap: 10px; }
 
 /* EMPTY / ERROR */
 .empty-state {
@@ -370,7 +400,7 @@ tr:hover td { background: var(--accent-light); }
   /* Hide all interactive / input UI */
   header, .sync-card, .section-label, #rxList,
   .empty-state, #emptyState, .actions, #errorMsg,
-  .btn-print { display: none !important; }
+  .btn-print, .import-modal { display: none !important; }
 
   body { background: #fff; font-size: 11pt; }
   main { max-width: 100%; padding: 12px 16px 24px; }

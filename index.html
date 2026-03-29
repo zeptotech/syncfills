@@ -50,10 +50,25 @@
     <button class="btn btn-add" onclick="addRx()">+ Add Prescription</button>
     <button class="btn btn-calculate" onclick="calculate()">▶ Calculate Sync</button>
     <button class="btn btn-clear" onclick="clearAll()">✕ Clear All</button>
+    <button class="btn btn-export" id="exportBtn" onclick="exportData()">↑ Export</button>
+    <button class="btn btn-import" onclick="openImportModal()">↓ Import</button>
     <button class="btn btn-print" id="printBtn" onclick="window.print()" style="display:none">⎙ Print</button>
   </div>
 
   <div id="results"></div>
+
+  <div class="import-modal" id="importModal" style="display:none">
+    <div class="import-modal-box">
+      <h3>Import Prescriptions</h3>
+      <p>Paste your export string below and click Load.</p>
+      <textarea id="importText" placeholder="Paste your export string here..."></textarea>
+      <div class="import-error" id="importError">Invalid string — please paste an unmodified export.</div>
+      <div class="import-modal-actions">
+        <button class="btn btn-calculate" onclick="confirmImport()">Load</button>
+        <button class="btn btn-clear" onclick="closeImportModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
 
 </main>
 

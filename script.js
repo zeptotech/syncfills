@@ -228,6 +228,109 @@ function clearAll() {
   updateEmptyState();
 }
 
+// ── IMPORT / EXPORT ───────────────────────────────────────────────────────
+
+// collectState reads all current form values into a plain object.
+function collectState() {
+  return {
+    version: 1,
+    settings: {
+      todayDate:   document.getElementById('todayDate').value,
+      gracePeriod: document.getElementById('gracePeriod').value,
+      stdSupply:   document.getElementById('stdSupply').value,
+    },
+    medications: rxItems.map(id => ({
+      name:        document.getElementById(`name-${id}`).value,
+      date:        document.getElementById(`date-${id}`).value,
+      pills:       document.getElementById(`pills-${id}`).value,
+      doses:       document.getElementById(`doses-${id}`).value,
+      supply:      document.getElementById(`supply-${id}`).value,
+      neverEarly:  document.getElementById(`noearly-${id}`).checked,
+      fixedSupply: document.getElementById(`fixedsupply-${id}`).checked,
+    })),
+  };
+}
+
+// applyState wipes the current form and repopulates it from a state object.
+function applyState(data) {
+  clearAll();
+  if (data.settings) {
+    if (data.settings.todayDate)   document.getElementById('todayDate').value   = data.settings.todayDate;
+    if (data.settings.gracePeriod) document.getElementById('gracePeriod').value = data.settings.gracePeriod;
+    if (data.settings.stdSupply)   document.getElementById('stdSupply').value   = data.settings.stdSupply;
+  }
+  (data.medications || []).forEach(med => {
+    addRx();
+    const id = rxItems[rxItems.length - 1];
+    document.getElementById(`name-${id}`).value          = med.name        || '';
+    document.getElementById(`date-${id}`).value          = med.date        || '';
+    document.getElementById(`pills-${id}`).value         = med.pills       || '';
+    document.getElementById(`doses-${id}`).value         = med.doses       || 1;
+    document.getElementById(`supply-${id}`).value        = med.supply      || '';
+    document.getElementById(`noearly-${id}`).checked     = !!med.neverEarly;
+    document.getElementById(`fixedsupply-${id}`).checked = !!med.fixedSupply;
+    // Re-trigger input watchers so mode-date / mode-pills classes update correctly
+    document.getElementById(`date-${id}`).dispatchEvent(new Event('input'));
+  });
+}
+
+// exportData encodes the current state as a base64 string and copies it to clipboard.
+function exportData() {
+  if (rxItems.length === 0) { showError('Nothing to export — add at least one prescription first.'); return; }
+  const str = btoa(JSON.stringify(collectState()));
+  navigator.clipboard.writeText(str).then(() => {
+    const btn = document.getElementById('exportBtn');
+    const orig = btn.textContent;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = orig, 2000);
+  }).catch(() => {
+    // Clipboard API blocked (e.g. non-HTTPS) — show the string so user can copy manually
+    document.getElementById('importText').value = str;
+    openImportModal();
+  });
+}
+
+function openImportModal() {
+  document.getElementById('importModal').style.display = 'flex';
+  document.getElementById('importError').style.display = 'none';
+}
+
+function closeImportModal() {
+  document.getElementById('importModal').style.display = 'none';
+  document.getElementById('importText').value = '';
+  document.getElementById('importError').style.display = 'none';
+}
+
+function confirmImport() {
+  const raw = document.getElementById('importText').value.trim();
+  try {
+    const data = JSON.parse(atob(raw));
+    applyState(data);
+    saveToStorage();
+    closeImportModal();
+  } catch(e) {
+    document.getElementById('importError').style.display = 'block';
+  }
+}
+
+// ── LOCAL STORAGE ─────────────────────────────────────────────────────────
+
+function saveToStorage() {
+  try { localStorage.setItem('rxsync_data', JSON.stringify(collectState())); } catch(e) {}
+}
+
+// Auto-save on any input change
+document.addEventListener('input',  saveToStorage);
+document.addEventListener('change', saveToStorage);
+
+// Restore last session on load (script is deferred, so DOM is ready)
+;(function() {
+  try {
+    const saved = localStorage.getItem('rxsync_data');
+    if (saved) applyState(JSON.parse(saved));
+  } catch(e) {}
+})();
+
 // ── CORE: derive last fill date from pills remaining ──────────────────────
 //
 //  When the user enters pills remaining instead of a last fill date, we work
