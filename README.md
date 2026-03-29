@@ -1,6 +1,6 @@
 # RxSync — Prescription Synchronization Tool
 
-A browser-based tool for pharmacists to synchronize a patient's prescriptions onto a single pickup date.
+A browser-based tool for pharmacies to synchronize a patient's prescriptions onto a single pickup date.
 
 ## What it does
 
@@ -11,8 +11,8 @@ Given a set of prescriptions with different fill dates and days supplies, RxSync
 1. Set today's date, buffer period, and standard days supply in the Settings panel
 2. Add each prescription — enter the drug name, last fill date or pills remaining, and days supply
 3. Click **Calculate Sync** to generate the fill plan
-4. Review the fill plan table, pickup schedule, and visual timeline
-5. Click **Print** to give the plan to the patient
+4. Review the pickup schedule and visual timeline
+5. Click **Print** to hand the plan to the patient
 
 ## Features
 
@@ -20,8 +20,9 @@ Given a set of prescriptions with different fill dates and days supplies, RxSync
 - Per-medication toggles: never fill early, fixed days supply
 - Visual timeline showing current and upcoming fill periods
 - Chronological pickup schedule grouped by date
-- Print-friendly layout
+- Export and import session data as a portable string
+- Print-friendly patient handout
 
 ## Running locally
 
-- Running on Github pages
+- Available via GitHub Pages.
