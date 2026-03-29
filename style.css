@@ -59,6 +59,14 @@ main { max-width: 1160px; margin: 0 auto; padding: 40px 24px 80px; }
 }
 .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
+.results-view-label {
+  font-size: 0.68rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.12em; color: var(--ink-muted);
+  display: flex; align-items: center; gap: 10px;
+  margin: 24px 0 14px;
+}
+.results-view-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
 /* SETTINGS CARD */
 .sync-card {
   background: var(--surface); border: 1px solid var(--border);
@@ -377,7 +385,7 @@ tr:hover td { background: var(--accent-light); }
 /* ── PRINT STYLES ─────────────────────────────────────────── */
 @media print {
   /* Hide all interactive / input UI */
-  header, .sync-card, .section-label, #rxList,
+  header, .sync-card, .section-label, .results-view-label, #rxList,
   .empty-state, #emptyState, .actions, #errorMsg,
   .btn-print, .import-modal { display: none !important; }
 

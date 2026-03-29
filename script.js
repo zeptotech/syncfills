@@ -517,6 +517,12 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   `;
   out.appendChild(banner);
 
+  // ── Section dividers ──────────────────────────────────────────────────
+  const pharmLabel = document.createElement('div');
+  pharmLabel.className = 'results-view-label';
+  pharmLabel.textContent = 'Pharmacy use';
+  out.appendChild(pharmLabel);
+
   // ── Fill plan table ────────────────────────────────────────────────────
   // One row per prescription showing what to do before the sync date.
   const block = document.createElement('div');
@@ -569,6 +575,12 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   renderTimeline(out, plans, grace, syncTarget, syncExpiry, today);
 
   out.appendChild(afterNote);
+
+  const patientLabel = document.createElement('div');
+  patientLabel.className = 'results-view-label';
+  patientLabel.textContent = 'Patient handout';
+  out.appendChild(patientLabel);
+
   renderSchedule(out, plans, grace, stdDays, syncTarget, today);
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
