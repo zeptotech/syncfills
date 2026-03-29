@@ -18,7 +18,7 @@
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { font-size: 19px; }
+html { font-size: 17px; }
 
 body {
   font-family: 'Inter', sans-serif;
