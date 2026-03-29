@@ -364,6 +364,16 @@ tr:hover td { background: var(--accent-light); }
 .print-header h2 { font-family: 'Inter', sans-serif; font-size: 1.2rem; font-weight: 800; }
 .print-header p { font-size: 0.75rem; color: #555; margin-top: 4px; }
 
+.disclaimer {
+  margin-top: 32px;
+  padding: 12px 16px;
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  border-top: 1px solid var(--border);
+  text-align: center;
+  line-height: 1.5;
+}
+
 /* ── PRINT STYLES ─────────────────────────────────────────── */
 @media print {
   /* Hide all interactive / input UI */
@@ -461,6 +471,13 @@ tr:hover td { background: var(--accent-light); }
 
   /* Hide fill schedule and timeline — pharmacist view only, not on patient handout */
   .fill-plan-intro, .fill-plan-block, .timeline-block { display: none !important; }
+
+  .disclaimer {
+    border-top: 1px solid #000 !important;
+    color: #555 !important;
+    font-size: 0.7rem !important;
+    margin-top: 20px !important;
+  }
 
   /* ── Timeline: B&W hatch patterns for laser printing ── */
 
