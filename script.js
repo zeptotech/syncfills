@@ -121,6 +121,15 @@ function watchCardInputs(id) {
   update(); // run once on load in case the card is pre-filled (e.g. after a future restore feature)
 }
 
+// renumberCards updates the "Medication #N" label on each card to reflect
+// its current position in rxItems, so removing a card doesn't leave gaps.
+function renumberCards() {
+  rxItems.forEach((id, i) => {
+    const el = document.querySelector(`#rx-${id} .rx-num`);
+    if (el) el.textContent = `Medication #${i + 1}`;
+  });
+}
+
 // addRx creates a new prescription card, appends it to the list, and wires
 // up its live input watchers. Each card gets a unique numeric ID (rxCounter).
 function addRx() {
@@ -180,6 +189,7 @@ function addRx() {
   `;
   list.appendChild(card);
   watchCardInputs(id);
+  renumberCards();
 }
 
 // removeRx slides the card out with a CSS animation before removing it from
@@ -191,7 +201,7 @@ function removeRx(id) {
   if (card) {
     card.style.opacity = '0'; card.style.transform = 'translateX(12px)';
     card.style.transition = 'all 0.2s ease';
-    setTimeout(() => card.remove(), 200);
+    setTimeout(() => { card.remove(); renumberCards(); }, 200);
   }
   // Wait slightly longer than the animation before checking empty state
   setTimeout(updateEmptyState, 210);
