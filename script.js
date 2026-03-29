@@ -160,13 +160,20 @@ function addRx() {
       <div class="or-line"></div>
     </div>
 
-    <div class="rx-field-pills field-group">
-      <label>Pills Remaining</label>
-      <input type="number" id="pills-${id}" min="0" max="9999" placeholder="#"
-             style="width:140px">
+    <div class="rx-pills-group">
+      <div class="rx-field-pills field-group">
+        <label>Pills Remaining</label>
+        <input type="number" id="pills-${id}" min="0" max="9999" placeholder="#"
+               style="width:90px">
+      </div>
+      <div class="rx-field-doses field-group">
+        <label>Doses / Day</label>
+        <input type="number" id="doses-${id}" min="1" max="99" value="1"
+               style="width:60px">
+      </div>
     </div>
 
-    <div class="field-group">
+    <div class="rx-field-supply field-group">
       <label>Days Supply</label>
       <input type="number" id="supply-${id}" min="1" max="365" placeholder="#"
              style="width:100px">
@@ -307,12 +314,13 @@ function calculate() {
       if (isNaN(pills) || pills < 0) {
         showError(`"${name}": Pills Remaining must be 0 or more.`); hasError = true; break;
       }
-      // Sanity check: 10× the days supply is an unreasonably large pill count
-      if (pills > supply * 10) {
-        showError(`"${name}": Pills Remaining (${pills}) seems too high for a ${supply}-day supply. Check doses/day.`);
+      const dosesPerDay = Math.max(1, parseFloat(document.getElementById(`doses-${id}`).value) || 1);
+      const daysRemaining = Math.round(pills / dosesPerDay);
+      // Sanity check: more than 10× the days supply remaining is unreasonably high
+      if (daysRemaining > supply * 10) {
+        showError(`"${name}": Pills Remaining seems too high for a ${supply}-day supply. Check doses/day.`);
         hasError = true; break;
       }
-      const daysRemaining = Math.round(pills); // 1 pill = 1 day assumption
       lastFill = addDays(today, -(supply - daysRemaining));
       derived  = true;
     }

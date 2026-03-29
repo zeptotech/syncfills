@@ -116,21 +116,29 @@ input[type="number"] { width: 90px; }
   border: 1px solid var(--border);
 }
 
+/* Pills + Doses/day sit side-by-side in one grid cell */
+.rx-pills-group { display: flex; align-items: flex-end; gap: 8px; }
+
+/* Extra separation between doses/day and days supply */
+.rx-field-supply { margin-left: 12px; }
+
 /* Active / dimmed states for the two input methods */
-.rx-field-date, .rx-field-pills {
+.rx-field-date, .rx-field-pills, .rx-field-doses {
   display: flex; flex-direction: column; gap: 6px; transition: opacity 0.2s;
 }
-.rx-field-date label, .rx-field-pills label {
+.rx-field-date label, .rx-field-pills label, .rx-field-doses label {
   font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted);
 }
 
 /* When one side is active, dim the other */
-.rx-card.mode-date .rx-field-pills input   { opacity: 0.35; }
-.rx-card.mode-pills .rx-field-date  input  { opacity: 0.35; }
+.rx-card.mode-date .rx-field-pills input,
+.rx-card.mode-date .rx-field-doses input  { opacity: 0.35; }
+.rx-card.mode-pills .rx-field-date  input { opacity: 0.35; }
 
 /* Highlight the active field's border */
 .rx-card.mode-date  .rx-field-date  input  { border-color: var(--accent); }
-.rx-card.mode-pills .rx-field-pills input  { border-color: var(--accent); }
+.rx-card.mode-pills .rx-field-pills input,
+.rx-card.mode-pills .rx-field-doses input  { border-color: var(--accent); }
 
 /* Error highlight */
 .rx-card.input-error {
@@ -138,13 +146,15 @@ input[type="number"] { width: 90px; }
   box-shadow: 0 0 0 3px rgba(200,68,10,0.08) !important;
 }
 .rx-card.input-error .rx-field-date input,
-.rx-card.input-error .rx-field-pills input {
+.rx-card.input-error .rx-field-pills input,
+.rx-card.input-error .rx-field-doses input {
   border-color: var(--accent2);
 }
 
 /* conflict highlight — both filled */
 .rx-card.input-conflict .rx-field-date  input,
-.rx-card.input-conflict .rx-field-pills input {
+.rx-card.input-conflict .rx-field-pills input,
+.rx-card.input-conflict .rx-field-doses input {
   border-color: var(--accent2);
   background: var(--accent2-light);
 }
@@ -270,7 +280,7 @@ tr:hover td { background: var(--accent-light); }
 
 /* PER-CARD TOGGLES (never fill early + fixed supply) */
 .rx-toggles {
-  align-self: end; display: flex; flex-direction: column; gap: 8px; white-space: nowrap;
+  align-self: end; display: flex; flex-direction: column; gap: 8px; white-space: nowrap; margin-left: 12px;
 }
 .rx-toggle-label {
   display: flex; align-items: center; gap: 7px;
@@ -540,7 +550,7 @@ tr:hover td { background: var(--accent-light); }
   }
   .rx-card > *:first-child { grid-column: 1 / -1; }
   .or-divider { display: none; }
-  .rx-field-pills { grid-column: 2; }
+  .rx-pills-group { grid-column: 2; }
   .rx-toggles { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
   .summary-bar { grid-template-columns: 1fr; }
   .summary-item { border-right: none; border-bottom: 1px solid var(--border); }
