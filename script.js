@@ -183,7 +183,7 @@ function addRx() {
     <div class="rx-toggles">
       <label class="rx-toggle-label">
         <input type="checkbox" id="noearly-${id}" class="rx-toggle-cb">
-        Never fill early
+        Do not fill early
       </label>
       <label class="rx-toggle-label">
         <input type="checkbox" id="fixedsupply-${id}" class="rx-toggle-cb">
