@@ -576,14 +576,17 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   out.appendChild(afterNote);
 
   renderTimeline(out, plans, grace, syncTarget, syncExpiry, today);
-  renderSchedule(out, plans, stdDays, syncTarget, today);
+  renderSchedule(out, plans, grace, stdDays, syncTarget, today);
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ── SCHEDULE ──────────────────────────────────────────────────────────────
 // renderSchedule builds a chronological pickup list sorted by fill date.
 // Rows sharing the same date are visually grouped under a date header.
-function renderSchedule(out, plans, stdDays, syncTarget, today) {
+// The schedule has two sections:
+//   1. Bridge fills — interim short fills before the sync date
+//   2. Sync date — all non-fixed prescriptions filling together
+function renderSchedule(out, plans, grace, stdDays, syncTarget, today) {
   const block = document.createElement('div');
   block.className = 'section-block';
 
@@ -591,24 +594,6 @@ function renderSchedule(out, plans, stdDays, syncTarget, today) {
   blockHead.className = 'section-block-header';
   blockHead.innerHTML = `<h3>Pickup Schedule</h3><span class="event-date-label">What to bring to the pharmacy and when</span>`;
   block.appendChild(blockHead);
-
-  // Sort plans by fill date ascending, then by name for ties
-  const sorted = [...plans].sort((a, b) => {
-    const diff = a.fillDate - b.fillDate;
-    return diff !== 0 ? diff : a.name.localeCompare(b.name);
-  });
-
-  // Group into date buckets
-  const groups = [];
-  for (const p of sorted) {
-    const key = p.fillDate.getTime();
-    const last = groups[groups.length - 1];
-    if (last && last.key === key) {
-      last.items.push(p);
-    } else {
-      groups.push({ key, date: p.fillDate, items: [p] });
-    }
-  }
 
   const table = document.createElement('table');
   table.innerHTML = `
@@ -621,39 +606,104 @@ function renderSchedule(out, plans, stdDays, syncTarget, today) {
   `;
   const tbody = document.createElement('tbody');
 
-  groups.forEach(group => {
-    const isSync = group.date.getTime() === syncTarget.getTime();
+  // ── Section 1: bridge fills ──────────────────────────────────────────────
+  // Short fills happen before the sync date to bridge the gap.
+  // Group by fill date so same-day fills appear together.
+  const bridgePlans = [...plans]
+    .filter(p => p.fillType === 'short')
+    .sort((a, b) => a.fillDate - b.fillDate || a.name.localeCompare(b.name));
+
+  const bridgeGroups = [];
+  for (const p of bridgePlans) {
+    const key  = p.fillDate.getTime();
+    const last = bridgeGroups[bridgeGroups.length - 1];
+    if (last && last.key === key) last.items.push(p);
+    else bridgeGroups.push({ key, date: p.fillDate, items: [p] });
+  }
+
+  bridgeGroups.forEach(group => {
     const isPast = group.date < today;
-
     group.items.forEach((p, idx) => {
-      let badgeClass;
-      if (p.fillType === 'fixed')       badgeClass = 'pill-purple';
-      else if (p.fillType === 'short')  badgeClass = 'pill-amber';
-      else if (p.fillType === 'anchor') badgeClass = 'pill-green';
-      else                              badgeClass = 'pill-blue';
-
       const tr = document.createElement('tr');
-      if (isSync) tr.classList.add('schedule-row-sync');
       if (isPast) tr.classList.add('schedule-row-past');
-
-      // Only show the date cell on the first row of each group; span the rest
       const dateCell = idx === 0
-        ? `<td rowspan="${group.items.length}" class="schedule-date-cell${isSync ? ' schedule-date-sync' : ''}${isPast ? ' schedule-date-past' : ''}">
+        ? `<td rowspan="${group.items.length}" class="schedule-date-cell${isPast ? ' schedule-date-past' : ''}">
              ${fd(group.date)}
-             ${isSync ? '<div class="schedule-sync-tag">Sync date</div>' : ''}
              ${isPast ? '<div class="schedule-past-tag">Fill now</div>' : ''}
            </td>`
         : '';
-
       tr.innerHTML = `
         ${dateCell}
         <td style="font-weight:500">${p.name}</td>
-        <td><span class="pill-badge ${badgeClass}">${p.fillDays}d</span></td>
+        <td><span class="pill-badge pill-amber">${p.fillDays}d</span></td>
         <td>${fd(p.newExpiry)}</td>
       `;
       tbody.appendChild(tr);
     });
   });
+
+  // ── Section 2: sync date — all non-fixed prescriptions ──────────────────
+  // On the sync date every non-fixed prescription fills together for stdDays.
+  const syncItems = [...plans]
+    .filter(p => p.fillType !== 'fixed')
+    .sort((a, b) => a.name.localeCompare(b.name))
+    .map(p => ({ ...p, fillDays: stdDays, newExpiry: addDays(syncTarget, stdDays) }));
+
+  const syncIsPast = syncTarget < today;
+
+  const syncBanner = document.createElement('tr');
+  syncBanner.innerHTML = `
+    <td colspan="4" class="schedule-sync-banner">
+      Fill all ${syncItems.length} prescriptions together on this date — this is your sync date
+    </td>
+  `;
+  tbody.appendChild(syncBanner);
+
+  syncItems.forEach((p, idx) => {
+    const tr = document.createElement('tr');
+    tr.classList.add('schedule-row-sync');
+    if (syncIsPast) tr.classList.add('schedule-row-past');
+    const dateCell = idx === 0
+      ? `<td rowspan="${syncItems.length}" class="schedule-date-cell schedule-date-sync${syncIsPast ? ' schedule-date-past' : ''}">
+           ${fd(syncTarget)}
+           ${syncIsPast ? '<div class="schedule-past-tag">Fill now</div>' : ''}
+         </td>`
+      : '';
+    tr.innerHTML = `
+      ${dateCell}
+      <td style="font-weight:500">${p.name}</td>
+      <td><span class="pill-badge pill-green">${p.fillDays}d</span></td>
+      <td>${fd(p.newExpiry)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // ── Fixed supply prescriptions ───────────────────────────────────────────
+  // Fixed meds run on their own schedule and don't participate in the sync.
+  const fixedPlans = [...plans]
+    .filter(p => p.fillType === 'fixed')
+    .sort((a, b) => a.fillDate - b.fillDate || a.name.localeCompare(b.name));
+
+  if (fixedPlans.length > 0) {
+    fixedPlans.forEach((p, idx) => {
+      const isPast = p.fillDate < today;
+      const tr = document.createElement('tr');
+      if (isPast) tr.classList.add('schedule-row-past');
+      const dateCell = idx === 0
+        ? `<td rowspan="${fixedPlans.length}" class="schedule-date-cell${isPast ? ' schedule-date-past' : ''}">
+             ${fd(p.fillDate)}
+             ${isPast ? '<div class="schedule-past-tag">Fill now</div>' : ''}
+           </td>`
+        : '';
+      tr.innerHTML = `
+        ${dateCell}
+        <td style="font-weight:500">${p.name}</td>
+        <td><span class="pill-badge pill-purple">${p.fillDays}d</span></td>
+        <td>${fd(p.newExpiry)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
 
   table.appendChild(tbody);
   block.appendChild(table);
