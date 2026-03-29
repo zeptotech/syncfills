@@ -328,7 +328,8 @@ function calculate() {
   // We use syncTarget (not syncExpiry) as the displayed goal because it's the
   // actual pickup date — the day the patient should go to the pharmacy.
   const syncExpiry = meds.reduce((best, m) => m.expiry > best ? m.expiry : best, meds[0].expiry);
-  const syncTarget = addDays(syncExpiry, -grace);
+  const rawSyncTarget = addDays(syncExpiry, -grace);
+  const syncTarget = rawSyncTarget < today ? today : rawSyncTarget;
 
   // ── Step 3: build the fill plan for each med ─────────────────────────
   const plans = meds.map(med => {
@@ -460,7 +461,7 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   // ── Fill plan table ────────────────────────────────────────────────────
   // One row per prescription showing what to do before the sync date.
   const block = document.createElement('div');
-  block.className = 'section-block';
+  block.className = 'section-block fill-plan-block';
 
   const blockHead = document.createElement('div');
   blockHead.className = 'section-block-header';
@@ -472,9 +473,9 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
     <thead><tr>
       <th>#</th>
       <th>Prescription</th>
-      <th>Current Expiry</th>
+      <th>Due on</th>
       <th>Recommended Fill Date</th>
-      <th>Dispense Days Supply</th>
+      <th>Days Supply</th>
       <th>Next Due for Refill</th>
       <th>Type</th>
     </tr></thead>
@@ -646,7 +647,7 @@ function renderSchedule(out, plans, stdDays, syncTarget, today) {
 // Vertical lines mark today, each non-anchor fill date, and the sync target.
 function renderTimeline(out, plans, grace, syncTarget, syncExpiry, today) {
   const block = document.createElement('div');
-  block.className = 'section-block';
+  block.className = 'section-block timeline-block';
 
   const blockHead = document.createElement('div');
   blockHead.className = 'section-block-header';

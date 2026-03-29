@@ -407,10 +407,14 @@ tr:hover td { background: var(--accent-light); }
   .summary-value { font-size: 1.1rem !important; margin-bottom: 1px !important; }
   .summary-label { font-size: 0.55rem !important; }
 
-  /* Table: keep headers on every page, avoid splitting rows */
+  /* Table: keep headers on every page, avoid splitting rows, fit within page */
   thead { display: table-header-group; }
   tr { page-break-inside: avoid; }
   tr:hover td { background: none; }
+  table { table-layout: fixed; width: 100%; font-size: 0.72rem; }
+  th { padding: 6px 8px !important; font-size: 0.65rem; }
+  td { padding: 6px 8px !important; font-size: 0.72rem; }
+  .fill-plan-block th:first-child, .fill-plan-block td:first-child { width: 24px; text-align: center; }
 
   /* Force color printing for badges and timeline segments */
   .pill-badge, .type-badge, .derived-badge, .never-early-badge, .fixed-supply-badge,
@@ -419,8 +423,13 @@ tr:hover td { background: var(--accent-light); }
     print-color-adjust: exact;
   }
 
-  /* Keep timeline legible but don't let it break across pages */
-  .section-block:last-child { page-break-inside: avoid; }
+  /* Timeline: always starts on a new page, no internal breaks, clips overflow */
+  .timeline-block {
+    page-break-before: always;
+    page-break-inside: avoid;
+  }
+  .timeline-wrap { overflow: hidden; }
+  .tl-track { overflow: hidden; }
 
   /* ── Timeline: B&W hatch patterns for laser printing ── */
 
