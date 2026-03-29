@@ -281,22 +281,6 @@ tr:hover td { background: var(--accent-light); }
 .pill-blue   { background: var(--blue); }
 .pill-purple { background: #6b3fa0; }
 
-.type-badge {
-  font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.1em;
-  padding: 3px 10px; border-radius: 99px; font-weight: 500; white-space: nowrap;
-}
-.type-short   { background: var(--accent2-light); color: var(--accent2); }
-.type-sync    { background: var(--accent-light);  color: var(--accent); }
-.type-normal  { background: var(--blue-light);    color: var(--blue); }
-.type-fixed   { background: #f0eaf8;              color: #6b3fa0; }
-
-/* DERIVED badge on the name col */
-.derived-badge {
-  font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.08em;
-  padding: 2px 7px; border-radius: 99px; margin-left: 6px;
-  background: var(--blue-light); color: var(--blue); vertical-align: middle;
-}
-
 /* PER-CARD TOGGLES (never fill early + fixed supply) */
 .rx-toggles {
   align-self: end; display: flex; flex-direction: column; gap: 8px; white-space: nowrap; margin-left: 12px;
@@ -307,13 +291,6 @@ tr:hover td { background: var(--accent-light); }
 }
 .rx-toggle-cb { width: 14px; height: 14px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
 
-/* RESULTS TABLE name-col badges */
-.never-early-badge, .fixed-supply-badge {
-  font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.08em;
-  padding: 2px 7px; border-radius: 99px; margin-left: 6px; vertical-align: middle;
-}
-.never-early-badge  { background: var(--accent2-light); color: var(--accent2); }
-.fixed-supply-badge { background: #f0eaf8; color: #6b3fa0; }
 
 /* TIMELINE */
 .timeline-wrap { padding: 24px; }
@@ -440,8 +417,7 @@ tr:hover td { background: var(--accent-light); }
   .fill-plan-block th:first-child, .fill-plan-block td:first-child { width: 24px; text-align: center; }
 
   /* Force color printing for badges and timeline segments */
-  .pill-badge, .type-badge, .derived-badge, .never-early-badge, .fixed-supply-badge,
-  .tl-seg, .tl-vline, .tl-leg-swatch {
+  .pill-badge, .tl-seg, .tl-vline, .tl-leg-swatch {
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }

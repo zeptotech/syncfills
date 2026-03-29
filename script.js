@@ -306,30 +306,12 @@ function confirmImport() {
   try {
     const data = JSON.parse(atob(raw));
     applyState(data);
-    saveToStorage();
     closeImportModal();
   } catch(e) {
     document.getElementById('importError').style.display = 'block';
   }
 }
 
-// ── LOCAL STORAGE ─────────────────────────────────────────────────────────
-
-function saveToStorage() {
-  try { localStorage.setItem('rxsync_data', JSON.stringify(collectState())); } catch(e) {}
-}
-
-// Auto-save on any input change
-document.addEventListener('input',  saveToStorage);
-document.addEventListener('change', saveToStorage);
-
-// Restore last session on load (script is deferred, so DOM is ready)
-;(function() {
-  try {
-    const saved = localStorage.getItem('rxsync_data');
-    if (saved) applyState(JSON.parse(saved));
-  } catch(e) {}
-})();
 
 // ── CORE: derive last fill date from pills remaining ──────────────────────
 //
@@ -512,7 +494,7 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   // Print-only header (hidden on screen, shown when printing)
   const printHeader = document.createElement('div');
   printHeader.className = 'print-header';
-  printHeader.innerHTML = `<h2>RxSync — Prescription Synchronization Plan</h2><p>Generated: ${fd(today)}</p>`;
+  printHeader.innerHTML = `<h2>RxSync — Prescription Synchronization Plan</h2><p>Generated: ${fd(today)} &nbsp;·&nbsp; Sync Target: ${fd(syncTarget)}</p>`;
   out.appendChild(printHeader);
 
   document.getElementById('printBtn').style.display = '';
@@ -524,14 +506,20 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   banner.innerHTML = `
     <div>
       <h2>Sync Target Date</h2>
-      <div class="sync-banner-sub">All prescriptions align for ${stdDays}-day fills from this date</div>
+      <div class="sync-banner-sub">Bring all prescriptions to the pharmacy on this date</div>
     </div>
     <div style="text-align:right">
       <div class="sync-banner-date">${fd(syncTarget)}</div>
-      <div class="sync-banner-sub">${grace}-day buffer period applies</div>
+      <div class="sync-banner-sub">All prescriptions will align to ${stdDays}-day fills</div>
     </div>
   `;
   out.appendChild(banner);
+
+  // ── Intro note ────────────────────────────────────────────────────────
+  const intro = document.createElement('div');
+  intro.style.cssText = 'font-size:0.82rem;color:var(--ink-muted);margin-bottom:20px;line-height:1.6;';
+  intro.textContent = `Follow the dates below to gradually align your prescriptions to a single pickup day. Once you reach the sync date, all ${plans.length} prescription${plans.length > 1 ? 's' : ''} will be filled together every ${stdDays} days.`;
+  out.appendChild(intro);
 
   // ── Fill plan table ────────────────────────────────────────────────────
   // One row per prescription showing what to do before the sync date.
@@ -540,7 +528,7 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
 
   const blockHead = document.createElement('div');
   blockHead.className = 'section-block-header';
-  blockHead.innerHTML = `<h3>Fill Plan — Interim Fills to Sync</h3><span class="event-date-label">One fill per Rx until sync date</span>`;
+  blockHead.innerHTML = `<h3>Your Fill Schedule</h3><span class="event-date-label">One fill per prescription until sync date</span>`;
   block.appendChild(blockHead);
 
   const table = document.createElement('table');
@@ -548,57 +536,27 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
     <thead><tr>
       <th>#</th>
       <th>Prescription</th>
-      <th>Due on</th>
-      <th>Recommended Fill Date</th>
+      <th>When to Fill</th>
       <th>Days Supply</th>
-      <th>Next Due for Refill</th>
-      <th>Type</th>
+      <th>Next Refill Due</th>
     </tr></thead>
   `;
   const tbody = document.createElement('tbody');
 
   plans.forEach((p, i) => {
-    // diffLabel shows how this fill compares to the standard supply length.
-    // Fixed-supply meds compare against their own supply, not the standard.
-    const compareBase = p.fixedSupply ? p.supply : stdDays;
-    const diff = p.fillDays - compareBase;
-    const diffLabel = p.fixedSupply ? `Fixed ${p.supply}d supply`
-      : diff === 0 ? 'Standard fill'
-      : diff > 0 ? `+${diff}d vs std`
-      : `${diff}d vs std (short)`;
-
-    // Badge and label styles vary by fill type
-    let badgeClass, typeClass, typeLabel;
-    if (p.fillType === 'fixed') {
-      badgeClass = 'pill-purple'; typeClass = 'type-fixed'; typeLabel = 'Fixed Supply';
-    } else if (p.fillType === 'short') {
-      badgeClass = 'pill-amber'; typeClass = 'type-short'; typeLabel = 'Short Fill';
-    } else if (p.fillType === 'anchor') {
-      badgeClass = 'pill-green'; typeClass = 'type-sync'; typeLabel = 'Anchor';
-    } else {
-      badgeClass = 'pill-blue'; typeClass = 'type-normal'; typeLabel = 'Normal Fill';
-    }
-
-    const neverEarlyTag = p.neverEarly
-      ? `<span class="never-early-badge" title="Never fill early — fills on exact due date only">no early fill</span>`
-      : '';
-
-    const fixedSupplyTag = p.fixedSupply
-      ? `<span class="fixed-supply-badge" title="Fixed days supply — always dispensed for exactly ${p.supply} days">fixed ${p.supply}d</span>`
-      : '';
+    let badgeClass;
+    if (p.fillType === 'fixed')       badgeClass = 'pill-purple';
+    else if (p.fillType === 'short')  badgeClass = 'pill-amber';
+    else if (p.fillType === 'anchor') badgeClass = 'pill-green';
+    else                              badgeClass = 'pill-blue';
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="color:var(--ink-muted);font-size:0.75rem">${i+1}</td>
-      <td style="font-weight:500">${p.name}${neverEarlyTag}${fixedSupplyTag}</td>
-      <td>${fd(p.expiry)}</td>
+      <td style="font-weight:500">${p.name}</td>
       <td style="font-weight:500">${fd(p.fillDate)}</td>
-      <td>
-        <span class="pill-badge ${badgeClass}">${p.fillDays}d</span>
-        <div style="font-size:0.7rem;color:var(--ink-muted);margin-top:3px">${diffLabel}</div>
-      </td>
-      <td style="font-weight:500">${fd(p.newExpiry)}</td>
-      <td><span class="type-badge ${typeClass}">${typeLabel}</span></td>
+      <td><span class="pill-badge ${badgeClass}">${p.fillDays}d</span></td>
+      <td>${fd(p.newExpiry)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -628,7 +586,7 @@ function renderSchedule(out, plans, stdDays, syncTarget, today) {
 
   const blockHead = document.createElement('div');
   blockHead.className = 'section-block-header';
-  blockHead.innerHTML = `<h3>Pickup Schedule</h3><span class="event-date-label">Sorted by fill date</span>`;
+  blockHead.innerHTML = `<h3>Pickup Schedule</h3><span class="event-date-label">What to bring to the pharmacy and when</span>`;
   block.appendChild(blockHead);
 
   // Sort plans by fill date ascending, then by name for ties
@@ -654,8 +612,8 @@ function renderSchedule(out, plans, stdDays, syncTarget, today) {
     <thead><tr>
       <th>Fill Date</th>
       <th>Prescription</th>
-      <th>Dispense Days Supply</th>
-      <th>Due for Refill</th>
+      <th>Days Supply</th>
+      <th>Next Refill Due</th>
     </tr></thead>
   `;
   const tbody = document.createElement('tbody');
@@ -687,10 +645,7 @@ function renderSchedule(out, plans, stdDays, syncTarget, today) {
       tr.innerHTML = `
         ${dateCell}
         <td style="font-weight:500">${p.name}</td>
-        <td>
-          <span class="pill-badge ${badgeClass}">${p.fillDays}d</span>
-          ${p.fillDays < stdDays ? '<div style="font-size:0.7rem;color:var(--ink-muted);margin-top:3px">Short fill</div>' : ''}
-        </td>
+        <td><span class="pill-badge ${badgeClass}">${p.fillDays}d</span></td>
         <td>${fd(p.newExpiry)}</td>
       `;
       tbody.appendChild(tr);
