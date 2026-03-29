@@ -167,9 +167,10 @@ function addRx() {
                style="width:90px">
       </div>
       <div class="rx-field-doses field-group">
-        <label>Doses / Day</label>
-        <input type="number" id="doses-${id}" min="1" max="99" value="1"
-               style="width:60px">
+        <label>Tablets / Day</label>
+        <select id="doses-${id}">
+          ${Array.from({length: 10}, (_,i) => `<option value="${i+1}"${i===0?' selected':''}>${i+1}</option>`).join('')}
+        </select>
       </div>
     </div>
 

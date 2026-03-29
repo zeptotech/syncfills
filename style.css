@@ -69,13 +69,13 @@ main { max-width: 1160px; margin: 0 auto; padding: 40px 24px 80px; }
 .field-group label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-muted); }
 .leeway-note { font-size: 0.7rem; color: var(--ink-muted); margin-top: 4px; }
 
-input[type="date"], input[type="number"], input[type="text"] {
+input[type="date"], input[type="number"], input[type="text"], select {
   font-family: 'Inter', sans-serif; font-size: 0.85rem;
   padding: 6px 10px; border: 1.5px solid var(--border);
   border-radius: var(--radius); background: var(--surface);
   color: var(--ink); outline: none; transition: border-color 0.15s, background 0.15s, opacity 0.15s;
 }
-input:focus { border-color: var(--accent); }
+input:focus, select:focus { border-color: var(--accent); }
 input[type="number"] { width: 90px; }
 
 /* ── RX CARDS ─────────────────────────────────────────── */
@@ -132,13 +132,13 @@ input[type="number"] { width: 90px; }
 
 /* When one side is active, dim the other */
 .rx-card.mode-date .rx-field-pills input,
-.rx-card.mode-date .rx-field-doses input  { opacity: 0.35; }
+.rx-card.mode-date .rx-field-doses select { opacity: 0.35; }
 .rx-card.mode-pills .rx-field-date  input { opacity: 0.35; }
 
 /* Highlight the active field's border */
 .rx-card.mode-date  .rx-field-date  input  { border-color: var(--accent); }
 .rx-card.mode-pills .rx-field-pills input,
-.rx-card.mode-pills .rx-field-doses input  { border-color: var(--accent); }
+.rx-card.mode-pills .rx-field-doses select { border-color: var(--accent); }
 
 /* Error highlight */
 .rx-card.input-error {
@@ -147,14 +147,14 @@ input[type="number"] { width: 90px; }
 }
 .rx-card.input-error .rx-field-date input,
 .rx-card.input-error .rx-field-pills input,
-.rx-card.input-error .rx-field-doses input {
+.rx-card.input-error .rx-field-doses select {
   border-color: var(--accent2);
 }
 
 /* conflict highlight — both filled */
 .rx-card.input-conflict .rx-field-date  input,
 .rx-card.input-conflict .rx-field-pills input,
-.rx-card.input-conflict .rx-field-doses input {
+.rx-card.input-conflict .rx-field-doses select {
   border-color: var(--accent2);
   background: var(--accent2-light);
 }
