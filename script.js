@@ -135,7 +135,7 @@ function addRx() {
   card.id = `rx-${id}`;
   card.innerHTML = `
     <div class="field-group" style="grid-column:1">
-      <div class="rx-num">Rx #${id}</div>
+      <div class="rx-num">Medication #${id}</div>
       <label>Drug / Prescription Name</label>
       <input type="text" placeholder="e.g. Metformin 500mg" id="name-${id}" autocomplete="off">
     </div>
