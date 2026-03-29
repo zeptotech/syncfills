@@ -408,21 +408,55 @@ tr:hover td { background: var(--accent-light); }
   }
 
   /* Flatten cards / remove decorative shadows */
-  .section-block { box-shadow: none !important; }
+  .section-block {
+    box-shadow: none !important;
+    border: 1.5px solid #000 !important;
+    border-radius: 0 !important;
+    margin-bottom: 16px !important;
+  }
+  .section-block-header {
+    border-bottom: 1px solid #000 !important;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .section-block-header h3 { color: #000 !important; }
+  .section-block-header span { color: #555 !important; }
+
+  /* After-sync note: black border, white background */
+  #results > div[style*="accent"] {
+    background: #fff !important; color: #000 !important;
+    border: 1.5px solid #000 !important; border-radius: 0 !important;
+  }
+
+  /* Intro paragraph */
+  #results > div[style*="ink-muted"] { color: #333 !important; }
 
   /* Table: keep headers on every page, avoid splitting rows, fit within page */
   thead { display: table-header-group; }
   tr { page-break-inside: avoid; }
-  tr:hover td { background: none; }
-  table { table-layout: fixed; width: 100%; font-size: 0.72rem; }
-  th { padding: 6px 8px !important; font-size: 0.65rem; }
-  td { padding: 6px 8px !important; font-size: 0.72rem; }
+  tr:hover td { background: none !important; }
+  table { table-layout: fixed; width: 100%; font-size: 0.72rem; border-collapse: collapse; }
+  th { padding: 6px 8px !important; font-size: 0.65rem; background: #fff !important; color: #000 !important; border: 1px solid #000 !important; }
+  td { padding: 6px 8px !important; font-size: 0.72rem; background: #fff !important; color: #000 !important; border: 1px solid #ccc !important; }
   .fill-plan-block th:first-child, .fill-plan-block td:first-child { width: 24px; text-align: center; }
 
-  /* Force color printing for badges and timeline segments */
-  .pill-badge, .tl-seg, .tl-vline, .tl-leg-swatch {
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
+  /* Pill badges: white background, black border, black text */
+  .pill-badge {
+    background: #fff !important; color: #000 !important;
+    border: 1.5px solid #000 !important;
+  }
+
+  /* Schedule row backgrounds → white */
+  .schedule-row-sync td,
+  .schedule-row-past td { background: #fff !important; color: #000 !important; }
+  .schedule-date-sync,
+  .schedule-date-past { color: #000 !important; font-weight: 700 !important; }
+  .schedule-past-tag { color: #000 !important; }
+
+  /* Sync date banner: solid black bar with white text */
+  .schedule-sync-banner {
+    background: #000 !important; color: #fff !important;
+    border: none !important;
   }
 
   /* Hide visual timeline — not needed on printed handouts */
