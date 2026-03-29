@@ -592,7 +592,7 @@ function renderSchedule(out, plans, grace, stdDays, syncTarget, today) {
 
   const blockHead = document.createElement('div');
   blockHead.className = 'section-block-header';
-  blockHead.innerHTML = `<h3>Pickup Schedule</h3><span class="event-date-label">What to bring to the pharmacy and when</span>`;
+  blockHead.innerHTML = `<h3>Pickup Schedule</h3><span class="event-date-label">Your fill schedule leading up to the sync date</span>`;
   block.appendChild(blockHead);
 
   const table = document.createElement('table');
@@ -600,7 +600,7 @@ function renderSchedule(out, plans, grace, stdDays, syncTarget, today) {
     <thead><tr>
       <th>Fill Date</th>
       <th>Prescription</th>
-      <th>Days Supply</th>
+      <th>Days Supply Given</th>
       <th>Next Refill Due</th>
     </tr></thead>
   `;
@@ -654,7 +654,7 @@ function renderSchedule(out, plans, grace, stdDays, syncTarget, today) {
   const syncBanner = document.createElement('tr');
   syncBanner.innerHTML = `
     <td colspan="4" class="schedule-sync-banner">
-      Fill all ${syncItems.length} prescriptions together on this date — this is your sync date
+      We will fill all ${syncItems.length} prescriptions together on this date — this is your sync date
     </td>
   `;
   tbody.appendChild(syncBanner);
