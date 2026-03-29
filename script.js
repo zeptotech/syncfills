@@ -339,8 +339,8 @@ document.addEventListener('change', saveToStorage);
 //    lastFill = today − (daysSupply − daysRemaining)
 //    daysRemaining = round(pillsRemaining / tabletsPerDay)
 //
-//  The "est." badge is shown on results derived this way, since the estimate
-//  may be slightly off depending on fill timing.
+//  Results derived this way use a blue timeline bar to distinguish them
+//  from date-based entries.
 
 // ── CALCULATE ─────────────────────────────────────────────────────────────
 // Main entry point triggered by the Calculate button. Reads all card inputs,
@@ -517,29 +517,6 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
 
   document.getElementById('printBtn').style.display = '';
 
-  // Quick counts used in the summary bar
-  const nShort   = plans.filter(p => p.fillType === 'short').length;
-  const nSynced  = plans.filter(p => p.fillType === 'anchor').length;
-
-  // ── Summary bar: at-a-glance numbers ──────────────────────────────────
-  const sumBar = document.createElement('div');
-  sumBar.className = 'summary-bar';
-  sumBar.innerHTML = `
-    <div class="summary-item">
-      <div class="summary-value">${plans.length}</div>
-      <div class="summary-label">Prescriptions</div>
-    </div>
-    <div class="summary-item">
-      <div class="summary-value">${nShort}</div>
-      <div class="summary-label">Short Fills Needed</div>
-    </div>
-    <div class="summary-item">
-      <div class="summary-value">${nSynced}</div>
-      <div class="summary-label">Already at Anchor</div>
-    </div>
-  `;
-  out.appendChild(sumBar);
-
   // ── Sync banner: the headline output ──────────────────────────────────
   // syncTarget is the pickup date (syncExpiry − grace), not the expiry itself.
   const banner = document.createElement('div');
@@ -602,11 +579,6 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
       badgeClass = 'pill-blue'; typeClass = 'type-normal'; typeLabel = 'Normal Fill';
     }
 
-    // "est." tag appears on the name when last fill date was estimated from pills
-    const derivedTag = p.derived
-      ? `<span class="derived-badge" title="Estimated from pills remaining">est.</span>`
-      : '';
-
     const neverEarlyTag = p.neverEarly
       ? `<span class="never-early-badge" title="Never fill early — fills on exact due date only">no early fill</span>`
       : '';
@@ -618,7 +590,7 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="color:var(--ink-muted);font-size:0.75rem">${i+1}</td>
-      <td style="font-weight:500">${p.name}${derivedTag}${neverEarlyTag}${fixedSupplyTag}</td>
+      <td style="font-weight:500">${p.name}${neverEarlyTag}${fixedSupplyTag}</td>
       <td>${fd(p.expiry)}</td>
       <td style="font-weight:500">${fd(p.fillDate)}</td>
       <td>

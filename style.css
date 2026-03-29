@@ -238,17 +238,6 @@ input[type="number"] { width: 90px; }
 #results { display: none; animation: fadeUp 0.3s ease; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 
-/* SUMMARY BAR */
-.summary-bar {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: var(--radius); margin-bottom: 20px;
-  overflow: hidden; box-shadow: var(--shadow);
-}
-.summary-item { padding: 18px 24px; border-right: 1px solid var(--border); text-align: center; }
-.summary-item:last-child { border-right: none; }
-.summary-value { font-family: 'Inter', sans-serif; font-size: 2rem; font-weight: 800; color: var(--accent); line-height: 1; margin-bottom: 4px; }
-.summary-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--ink-muted); }
 
 /* SYNC BANNER */
 .sync-banner {
@@ -439,13 +428,7 @@ tr:hover td { background: var(--accent-light); }
   }
 
   /* Flatten cards / remove decorative shadows */
-  .section-block, .summary-bar, .summary-item { box-shadow: none !important; }
-
-  /* Compact summary bar — single tight row */
-  .summary-bar { display: flex; margin-bottom: 12px; }
-  .summary-item { padding: 6px 16px !important; border-right: 1px solid var(--border) !important; border-bottom: none !important; flex: 1; }
-  .summary-value { font-size: 1.1rem !important; margin-bottom: 1px !important; }
-  .summary-label { font-size: 0.55rem !important; }
+  .section-block { box-shadow: none !important; }
 
   /* Table: keep headers on every page, avoid splitting rows, fit within page */
   thead { display: table-header-group; }
@@ -582,7 +565,5 @@ tr:hover td { background: var(--accent-light); }
   .or-divider { display: none; }
   .rx-pills-group { grid-column: 2; }
   .rx-toggles { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; }
-  .summary-bar { grid-template-columns: 1fr; }
-  .summary-item { border-right: none; border-bottom: 1px solid var(--border); }
   .tl-label { width: 80px; font-size: 0.6rem; }
 }
