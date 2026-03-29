@@ -574,13 +574,12 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
   afterNote.innerHTML = `<strong>After ${fd(syncTarget)}:</strong> We will fill all ${plans.length} prescriptions for <strong>${stdDays} days</strong> together on the same pickup — every cycle from this point forward.${grace > 0 ? `<br>Your prescriptions may be filled up to <strong>${grace} day${grace !== 1 ? 's' : ''} early</strong> each cycle leading up to your sync date.` : ''}`;
   renderTimeline(out, plans, grace, syncTarget, syncExpiry, today);
 
-  out.appendChild(afterNote);
-
   const patientLabel = document.createElement('div');
   patientLabel.className = 'results-view-label';
   patientLabel.textContent = 'Patient handout';
   out.appendChild(patientLabel);
 
+  out.appendChild(afterNote);
   renderSchedule(out, plans, grace, stdDays, syncTarget, today);
   out.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
