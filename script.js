@@ -520,6 +520,7 @@ function renderResults(plans, grace, stdDays, syncTarget, syncExpiry, today) {
 
   // ── Intro note ────────────────────────────────────────────────────────
   const intro = document.createElement('div');
+  intro.className = 'fill-plan-intro';
   intro.style.cssText = 'font-size:0.82rem;color:var(--ink-muted);margin-bottom:20px;line-height:1.6;';
   intro.textContent = `Follow the dates below to gradually align your prescriptions to a single pickup day. Once you reach the sync date, all ${plans.length} prescription${plans.length > 1 ? 's' : ''} will be filled together every ${stdDays} days.`;
   out.appendChild(intro);

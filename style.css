@@ -459,8 +459,8 @@ tr:hover td { background: var(--accent-light); }
     border: none !important;
   }
 
-  /* Hide visual timeline — not needed on printed handouts */
-  .timeline-block { display: none !important; }
+  /* Hide fill schedule and timeline — pharmacist view only, not on patient handout */
+  .fill-plan-intro, .fill-plan-block, .timeline-block { display: none !important; }
 
   /* ── Timeline: B&W hatch patterns for laser printing ── */
 
